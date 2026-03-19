@@ -1,0 +1,9 @@
+project_doc_fallback_filenames = ["docs/setup/codex_workflow.md"]
+
+developer_instructions = """
+Treat AGENTS.md as the repository operating contract for all work in this repo.
+Use the narrow agent definitions in .codex/agents only for their stated scopes.
+Start with repo_mapper when the task is not already localized.
+Do not automatically launch expensive paid runs, package submissions, or alter accepted records.
+Follow the Parameter Golf constraints in AGENTS.md before changing training or evaluation workflows.
+"""
