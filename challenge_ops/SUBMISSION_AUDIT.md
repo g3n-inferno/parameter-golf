@@ -10,6 +10,7 @@ This file is an audit template and checklist, not a replacement for the complian
 - Active candidate: `none recorded yet`
 - Submission intent: `not started`
 - Last completed preflight: `none recorded yet`
+- Latest gating evidence: `ablate_lr_warmdown_1xh100_20260320_runpod` regressed to `val_bpb=1.33058722` on `1xH100-surrogate`, so no submission candidate was promoted from this run.
 
 ## Mandatory Checks
 
