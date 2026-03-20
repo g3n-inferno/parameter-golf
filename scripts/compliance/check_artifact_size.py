@@ -29,7 +29,7 @@ def load_parse_module(root: Path):
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("target", type=Path, help="Candidate folder, submission.json, or train.log path.")
+    parser.add_argument("target", type=Path, help="Candidate folder, submission.json, summary.json, or train.log path.")
     parser.add_argument("--cap", type=int, default=DEFAULT_CAP, help=f"Artifact cap in bytes. Default: {DEFAULT_CAP}")
     return parser
 
@@ -38,15 +38,26 @@ def resolve_total(root: Path, target: Path) -> tuple[int | None, str]:
     if target.is_dir():
         submission = target / "submission.json"
         train_log = target / "train.log"
+        summary_json = target / "summary.json"
     else:
-        submission = target if target.name == "submission.json" else None
+        submission = target if target.suffix == ".json" else None
         train_log = target if target.name.endswith(".log") else None
+        summary_json = target if target.suffix == ".json" else None
 
     if submission is not None and submission.is_file():
         data = json.loads(submission.read_text(encoding="utf-8"))
         value = data.get("bytes_total")
         if isinstance(value, (int, float)):
             return int(value), f"{submission} bytes_total"
+
+    if summary_json is not None and summary_json.is_file():
+        data = json.loads(summary_json.read_text(encoding="utf-8"))
+        value = data.get("total_submission_size_int8_zlib_bytes")
+        if isinstance(value, (int, float)):
+            return int(value), f"{summary_json} total_submission_size_int8_zlib_bytes"
+        value = data.get("total_submission_size_bytes")
+        if isinstance(value, (int, float)):
+            return int(value), f"{summary_json} total_submission_size_bytes"
 
     if train_log is not None and train_log.is_file():
         module = load_parse_module(root)

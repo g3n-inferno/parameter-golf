@@ -139,7 +139,39 @@ def parse_log(path: Path) -> dict:
     return result
 
 
-def format_summary(parsed: dict, label: str | None = None) -> str:
+def load_parsed_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_comparison(parsed: dict, other: dict, label: str) -> dict[str, object]:
+    comparison: dict[str, object] = {
+        "label": label,
+        "delta_val_loss": None,
+        "delta_val_bpb": None,
+        "delta_bytes_total": None,
+        "delta_stop_step": None,
+        "delta_eval_time_ms": None,
+    }
+
+    if parsed.get("final_val_loss") is not None and other.get("final_val_loss") is not None:
+        comparison["delta_val_loss"] = float(parsed["final_val_loss"]) - float(other["final_val_loss"])
+    if parsed.get("final_val_bpb") is not None and other.get("final_val_bpb") is not None:
+        comparison["delta_val_bpb"] = float(parsed["final_val_bpb"]) - float(other["final_val_bpb"])
+
+    parsed_total = parsed.get("total_submission_size_int8_zlib_bytes") or parsed.get("total_submission_size_bytes")
+    other_total = other.get("total_submission_size_int8_zlib_bytes") or other.get("total_submission_size_bytes")
+    if parsed_total is not None and other_total is not None:
+        comparison["delta_bytes_total"] = int(parsed_total) - int(other_total)
+
+    if parsed.get("stop_step") is not None and other.get("stop_step") is not None:
+        comparison["delta_stop_step"] = int(parsed["stop_step"]) - int(other["stop_step"])
+    if parsed.get("final_eval_time_ms") is not None and other.get("final_eval_time_ms") is not None:
+        comparison["delta_eval_time_ms"] = int(parsed["final_eval_time_ms"]) - int(other["final_eval_time_ms"])
+
+    return comparison
+
+
+def format_summary(parsed: dict, label: str | None = None, comparison: dict | None = None) -> str:
     title = label or Path(parsed["log_path"]).name
     lines = [f"log: {title}"]
 
@@ -193,6 +225,20 @@ def format_summary(parsed: dict, label: str | None = None) -> str:
     else:
         lines.append("peak memory: unavailable")
 
+    if comparison is not None:
+        compare_bits: list[str] = [f"reference={comparison['label']}"]
+        if comparison["delta_val_loss"] is not None:
+            compare_bits.append(f"delta_val_loss={comparison['delta_val_loss']:+.8f}")
+        if comparison["delta_val_bpb"] is not None:
+            compare_bits.append(f"delta_val_bpb={comparison['delta_val_bpb']:+.8f}")
+        if comparison["delta_bytes_total"] is not None:
+            compare_bits.append(f"delta_bytes_total={comparison['delta_bytes_total']:+d}")
+        if comparison["delta_stop_step"] is not None:
+            compare_bits.append(f"delta_stop_step={comparison['delta_stop_step']:+d}")
+        if comparison["delta_eval_time_ms"] is not None:
+            compare_bits.append(f"delta_eval_time_ms={comparison['delta_eval_time_ms']:+d}")
+        lines.append("comparison: " + " ".join(compare_bits))
+
     return "\n".join(lines)
 
 
@@ -202,6 +248,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json-out", type=Path, default=None, help="Write parsed fields as JSON.")
     parser.add_argument("--summary-out", type=Path, default=None, help="Write the human summary to a file.")
     parser.add_argument("--label", default=None, help="Optional label to use in the summary header.")
+    parser.add_argument(
+        "--compare-json",
+        type=Path,
+        default=None,
+        help="Optional parsed summary JSON to compare against.",
+    )
+    parser.add_argument(
+        "--compare-label",
+        default=None,
+        help="Optional label for the comparison target. Default: compare JSON filename.",
+    )
     parser.add_argument(
         "--require-final-metrics",
         action="store_true",
@@ -213,7 +270,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     parsed = parse_log(args.log_path)
-    summary = format_summary(parsed, label=args.label)
+    comparison = None
+    if args.compare_json is not None:
+        other = load_parsed_json(args.compare_json)
+        compare_label = args.compare_label or args.compare_json.stem
+        comparison = build_comparison(parsed, other, compare_label)
+        parsed["comparison"] = comparison
+    summary = format_summary(parsed, label=args.label, comparison=comparison)
 
     if args.json_out is not None:
         args.json_out.parent.mkdir(parents=True, exist_ok=True)
