@@ -1,0 +1,1 @@
+session_id,pod_id,pod_name,usage_scope,purpose,funding_note,session_start_utc,pod_ready_utc,session_end_utc,init_seconds,session_seconds,non_training_seconds,billed_amount_usd,billed_time_ms,cost_per_hr_usd,gpu_id,gpu_count,container_disk_gb,volume_gb,memory_gb,vcpu_count,image_name,data_center_id,secure_cloud,created_at_utc,notes

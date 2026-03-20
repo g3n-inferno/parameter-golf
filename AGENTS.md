@@ -64,6 +64,13 @@ Follow this order unless the task is tightly scoped and already localized:
 - Prefer direct SSH when it is genuinely reachable. If the pod exposes Jupyter first and SSH is still closed, use Jupyter as the control plane instead of waiting indefinitely.
 - Always verify whether `/workspace/parameter-golf` is a real git checkout. On the official template it may exist only as a stub directory and must be replaced with a real clone before any run.
 - Stop extra fallback pods immediately once one working pod is confirmed.
+- For any Runpod GPU compute used for this OpenAI challenge, initialize and maintain the local usage audit trail with `scripts/runpod/track_challenge_usage.py`.
+- Default to `python scripts/runpod/track_challenge_usage.py run-command ... -- <command>` for tracked one-shot runs on already-reachable pods.
+- If pod initialization time matters, use the explicit tracker lifecycle: `start-session` when pod start is requested, `mark-ready` when SSH/Jupyter is actually usable, then `start-run` / `finish-run` / `finish-session`.
+- Always set `usage_scope=challenge` for challenge compute unless the user explicitly says otherwise.
+- Default the Runpod challenge `funding_note` to `OpenAI Runpod credit allocation ($25, blended balance assumption)`.
+- Treat the local challenge credit budget as a fixed `$25` for audit/reporting purposes, even if the live Runpod account balance is higher because credits are blended together.
+- Treat the tracker as the required local audit layer for challenge-only compute. Runpod billing does not expose which credit source was consumed, so that attribution must be recorded locally.
 
 ### Baseline Reproduction
 
@@ -83,6 +90,7 @@ Follow this order unless the task is tightly scoped and already localized:
 - Keep experiment summaries concise and reproducible.
 - Use `experiments/ledger.csv` as the lightweight local source of truth for meaningful runs.
 - Use `scripts/experiments/new_experiment.py`, `scripts/experiments/update_ledger.py`, and `scripts/experiments/summarize_candidates.py` instead of ad hoc notes when possible.
+- For any Runpod challenge run, also maintain `experiments/runpod_sessions.csv` and `experiments/runpod_runs.csv` via `scripts/runpod/track_challenge_usage.py` so pod config, init time, run time, billed time, and billed cost are auditable.
 
 ### Submission Safety Checks
 
@@ -110,13 +118,15 @@ For future Codex-run remote experiments, the fastest safe path is:
 
 1. Confirm the official template and chosen GPU SKU with `runpodctl`.
 2. Create a cheap validation pod first when possible, then a `1xH100` pod for the real baseline path.
-3. Verify actual access, in this order: `runpodctl pod get`, `runpodctl ssh info`, direct SSH reachability, then Jupyter fallback.
-4. Confirm `/workspace/parameter-golf/.git` exists. If not, reclone the repo and pull `origin/main`.
-5. Run `bash scripts/runpod/verify_pod_env.sh`.
-6. Download the exact dataset needed for the intended comparison.
-7. Run the wrapper script, not a hand-edited trainer command, unless the user explicitly needs a custom launch.
-8. Monitor file-backed logs until the wrapper exits and summary files are present.
-9. Stop the pod once the logs and summaries are secured.
+3. Start the local Runpod challenge tracker session as soon as pod start is requested when init-time accounting matters.
+4. Verify actual access, in this order: `runpodctl pod get`, `runpodctl ssh info`, direct SSH reachability, then Jupyter fallback.
+5. Mark the tracker session ready once SSH or Jupyter is genuinely usable.
+6. Confirm `/workspace/parameter-golf/.git` exists. If not, reclone the repo and pull `origin/main`.
+7. Run `bash scripts/runpod/verify_pod_env.sh`.
+8. Download the exact dataset needed for the intended comparison.
+9. Run the experiment through the tracker wrapper or the explicit tracker lifecycle, not as an untracked hand-edited trainer command.
+10. Monitor file-backed logs until the wrapper exits and summary files are present.
+11. Finish the tracker run/session, record costs, then stop the pod once the logs and summaries are secured.
 
 When reporting results, always distinguish:
 
