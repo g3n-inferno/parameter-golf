@@ -8,6 +8,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 EXPERIMENT_ID="${EXPERIMENT_ID:-${1:-}}"
 LOG_ROOT_BASE="${LOG_ROOT_BASE:-$REPO_DIR/logs/experiments/next_1xh100_workstream}"
 BASELINE_COMPARE_JSON="${BASELINE_COMPARE_JSON:-$REPO_DIR/experiments/baselines/local_1xh100_baseline_summary.json}"
+SHARD_SCORE_ROOT="${SHARD_SCORE_ROOT:-$REPO_DIR/artifacts/shard_scores}"
 
 usage() {
   cat <<'EOF'
@@ -19,6 +20,11 @@ Supported experiment_id values:
   fp16_embed
   lr_warmdown
   compound_ctx1536
+  byte_aware_loss
+  easy_to_hard
+  quality_top_half
+  shared_depth
+  shared_depth_stable
 
 This wrapper preserves the documented 1xH100 baseline path and only layers named
 env-var ablations on top. It also refreshes experiments/ledger.csv from the
@@ -55,12 +61,17 @@ TOKENIZER_VARIANT="${TOKENIZER_VARIANT:-fineweb_1024_bpe.model}"
 TARGET_GPU_LABEL="${TARGET_GPU_LABEL:-h100}"
 TRACK_INTENT="${TRACK_INTENT:-non-record}"
 WALLCLOCK_TARGET="${WALLCLOCK_TARGET:-600s}"
+DATA_PATH_VALUE="${DATA_PATH:-$REPO_DIR/data/datasets/fineweb10B_sp1024}"
+TOKENIZER_PATH_VALUE="${TOKENIZER_PATH:-$REPO_DIR/data/tokenizers/fineweb_1024_bpe.model}"
+VOCAB_SIZE_VALUE="${VOCAB_SIZE:-1024}"
+SHARD_SCORE_PATH_VALUE="${SHARD_SCORE_PATH:-$SHARD_SCORE_ROOT/${DATASET_VARIANT}_train_shard_scores.json}"
+need_shard_scores=0
 
 common_env=(
   "TARGET_GPU_LABEL=$TARGET_GPU_LABEL"
-  "DATA_PATH=${DATA_PATH:-$REPO_DIR/data/datasets/fineweb10B_sp1024}"
-  "TOKENIZER_PATH=${TOKENIZER_PATH:-$REPO_DIR/data/tokenizers/fineweb_1024_bpe.model}"
-  "VOCAB_SIZE=${VOCAB_SIZE:-1024}"
+  "DATA_PATH=$DATA_PATH_VALUE"
+  "TOKENIZER_PATH=$TOKENIZER_PATH_VALUE"
+  "VOCAB_SIZE=$VOCAB_SIZE_VALUE"
   "EXPECTED_TRAIN_SHARDS=${EXPECTED_TRAIN_SHARDS:-80}"
   "ALLOW_PARTIAL_DATA=${ALLOW_PARTIAL_DATA:-0}"
   "TRAIN_LOG_EVERY=${TRAIN_LOG_EVERY:-50}"
@@ -104,6 +115,56 @@ case "$EXPERIMENT_ID" in
       "TRAIN_SEQ_LEN=1536"
     )
     ;;
+  byte_aware_loss)
+    RUN_ID="${RUN_ID:-ablate_byte_aware_loss_1xh100}"
+    CORE_HPARAMS="seq1024 9x512 kv4 mlp_mult2 byte_ce"
+    NOTES="byte-aware loss ablation: optimize nats-per-byte during training while preserving validation val_bpb computation"
+    experiment_env=(
+      "TRAIN_LOSS_MODE=byte_ce"
+    )
+    ;;
+  easy_to_hard)
+    RUN_ID="${RUN_ID:-ablate_easy_to_hard_1xh100}"
+    CORE_HPARAMS="seq1024 9x512 kv4 shard_order=easy_to_hard unigram_surprisal"
+    NOTES="easy-to-hard shard curriculum: deterministic shard ordering by ascending unigram surprisal on the provided FineWeb export"
+    need_shard_scores=1
+    experiment_env=(
+      "TRAIN_SHARD_ORDER=easy_to_hard"
+      "SHARD_SCORE_PATH=$SHARD_SCORE_PATH_VALUE"
+    )
+    ;;
+  quality_top_half)
+    RUN_ID="${RUN_ID:-ablate_quality_top_half_1xh100}"
+    CORE_HPARAMS="seq1024 9x512 kv4 quality_top_half shard_filter"
+    NOTES="high-quality subset ablation: keep the top half of train shards by deterministic byte-fragmentation and repetition heuristics"
+    need_shard_scores=1
+    experiment_env=(
+      "TRAIN_SHARD_FILTER=quality_top_fraction"
+      "TRAIN_SHARD_FILTER_FRACTION=0.5"
+      "SHARD_SCORE_PATH=$SHARD_SCORE_PATH_VALUE"
+    )
+    ;;
+  shared_depth)
+    RUN_ID="${RUN_ID:-ablate_shared_depth_1xh100}"
+    CORE_HPARAMS="seq1024 shared_depth cyclic unique3 passes9"
+    NOTES="shared-depth ablation: 3 unique blocks reused across 9 total passes with the current skip pattern"
+    experiment_env=(
+      "SHARED_DEPTH_MODE=cyclic"
+      "SHARED_DEPTH_UNIQUE_BLOCKS=3"
+      "SHARED_DEPTH_TOTAL_PASSES=9"
+    )
+    ;;
+  shared_depth_stable)
+    RUN_ID="${RUN_ID:-ablate_shared_depth_stable_1xh100}"
+    CORE_HPARAMS="seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse"
+    NOTES="shared-depth ablation with conservative residual scaling based on inverse sqrt reuse factor"
+    experiment_env=(
+      "SHARED_DEPTH_MODE=cyclic"
+      "SHARED_DEPTH_UNIQUE_BLOCKS=3"
+      "SHARED_DEPTH_TOTAL_PASSES=9"
+      "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+    )
+    ;;
   *)
     echo "unknown experiment_id: $EXPERIMENT_ID" >&2
     usage
@@ -112,6 +173,15 @@ case "$EXPERIMENT_ID" in
 esac
 
 LOG_ROOT="$LOG_ROOT_BASE/$EXPERIMENT_ID"
+
+if [[ "$need_shard_scores" -eq 1 && ! -f "$SHARD_SCORE_PATH_VALUE" ]]; then
+  mkdir -p "$SHARD_SCORE_ROOT"
+  "$PYTHON_BIN" "$REPO_DIR/scripts/experiments/score_train_shards.py" \
+    --data-path "$DATA_PATH_VALUE" \
+    --tokenizer-path "$TOKENIZER_PATH_VALUE" \
+    --vocab-size "$VOCAB_SIZE_VALUE" \
+    --output "$SHARD_SCORE_PATH_VALUE"
+fi
 
 "$PYTHON_BIN" "$REPO_DIR/scripts/experiments/new_experiment.py" \
   --run-id "$RUN_ID" \

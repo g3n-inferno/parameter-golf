@@ -32,6 +32,18 @@ bash scripts/experiments/run_1xh100_ablation.sh control
 That wrapper keeps the baseline command path, refreshes the ledger from the parsed
 summary JSON, and compares against `experiments/baselines/local_1xh100_baseline_summary.json`.
 
+Available named ablations in the current wrapper include:
+
+- `control`
+- `fp16_embed`
+- `lr_warmdown`
+- `compound_ctx1536`
+- `byte_aware_loss`
+- `easy_to_hard`
+- `quality_top_half`
+- `shared_depth`
+- `shared_depth_stable`
+
 ## Ledger Conventions
 
 Each meaningful run should track at least:
