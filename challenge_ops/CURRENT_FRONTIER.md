@@ -44,10 +44,13 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - Standardized name: `sliding_window_evaluation_stride64`
   - Verdict: `novel / already-tried / positive / track-candidate @ 8xH100-leaderboard`
   - Evidence: `records/track_10min_16mb/2026-03-19_SlidingWindowEval`.
+
+## Known Mixed Or Inconclusive Ideas
+
 - `lr_warmdown`
   - Standardized name: `longer_warmdown_schedule`
-  - Verdict: `variant / already-tried / positive / non-record @ 1xH100-surrogate`
-  - Evidence: `experiments/ledger.csv` entry `ablate_lr_warmdown_1xh100_1024` with `delta_val_bpb=-0.00411918` vs local baseline.
+  - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
+  - Evidence: local `ablate_lr_warmdown_1xh100_1024` reached `val_bpb=1.31909196`, but remote Runpod rerun `ablate_lr_warmdown_1xh100_20260320_runpod` regressed to `1.33058722` on the same nominal scope.
 
 ## Known Weak Or Negative Ideas
 
@@ -62,17 +65,17 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 
 ## Biggest Bottleneck
 
-- Confirmed: the repo now has stronger local `1xH100-surrogate` evidence than direct `8xH100-leaderboard` reruns.
-- Inferred: the main decision bottleneck is converting promising local variants into apples-to-apples leaderboard evidence without wasting paid runs or violating challenge constraints.
+- Confirmed: `1xH100-surrogate` reproducibility is now a bottleneck, because the strongest local `lr_warmdown` win did not reproduce on a real Runpod H100 SXM rerun.
+- Inferred: before promoting schedule tweaks toward leaderboard-relevant work, the project needs a cleaner remote control anchor on the same pod workflow to separate infrastructure variance from idea quality.
 
 ## Most Promising Next Experiment
 
-- Candidate: promote the strongest local schedule win into a leaderboard-comparable rerun.
-- Standardized name: `longer_warmdown_schedule`
+- Candidate: remote control rerun on the same Runpod H100 SXM workflow before spending more expensive comparison runs.
+- Standardized name: `local_control_baseline_rerun`
 - Why:
-  - Confirmed local evidence beats the current local baseline.
-  - Artifact headroom is still comfortable on the local run.
-  - It is a variant of an already legal, already packaged family rather than a new tokenizer or dataset path.
+  - Confirmed remote `lr_warmdown` evidence is worse than both the local baseline anchor and the local control rerun.
+  - A same-infrastructure control rerun is the cheapest way to determine whether the regression came from environment variance or the schedule tweak itself.
+  - Dataset, tokenizer, and training path can stay unchanged while clarifying the next decision.
 - Guardrails before any expensive run:
   - keep dataset and tokenizer unchanged
   - keep result reporting apples to apples
@@ -90,6 +93,7 @@ Artifact cap: `16000000` bytes
 | `Sliding Window Eval` | `8xH100-leaderboard` | `15874829` | `125171` |
 | `local_1xh100_baseline_summary` | `1xH100-surrogate` | `14037860` | `1962140` |
 | `ablate_lr_warmdown_1xh100_1024` | `1xH100-surrogate` | `12455545` | `3544455` |
+| `ablate_lr_warmdown_1xh100_20260320_runpod` | `1xH100-surrogate` | `12053652` | `3946348` |
 
 ## Terminology Reminders
 

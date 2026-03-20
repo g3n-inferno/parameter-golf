@@ -1,1 +1,2 @@
 session_id,run_id,experiment_id,train_command,run_start_utc,run_end_utc,run_seconds,billed_amount_usd,billed_time_ms,notes
+h100_20260320_lr_warmdown_a,ablate_lr_warmdown_1xh100_20260320_runpod,lr_warmdown_runpod_1xh100_20260320,RUN_ID=ablate_lr_warmdown_1xh100_20260320_runpod TARGET_GPU_LABEL=h100_sxm bash scripts/experiments/run_1xh100_ablation.sh lr_warmdown,2026-03-20T16:56:14Z,2026-03-20T17:10:17Z,843.000,0.00000000,0,
