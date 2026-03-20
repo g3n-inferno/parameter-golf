@@ -37,6 +37,15 @@ is still supported, but it stores the older historical Runpod baseline summary r
 hardware `Runpod 1xH100 pod`; override `EXPERIMENT_HARDWARE` only for true
 local-machine or other remote-host runs.
 
+Before a paid `1xH100-surrogate` Runpod run, validate the pod against the
+declared stable control profile:
+
+```bash
+python scripts/runpod/check_pod_profile.py \
+  --pod-id <pod_id> \
+  --profile-json challenge_ops/runpod_1xh100_control_profile.json
+```
+
 Available named ablations in the current wrapper include:
 
 - `control`
@@ -94,6 +103,13 @@ Summarize the current challenge-only totals:
 
 ```bash
 python scripts/runpod/track_challenge_usage.py report --usage-scope challenge
+```
+
+If billing rows are still zero immediately after a run or stop, refresh them once
+the Runpod billing API has caught up:
+
+```bash
+python scripts/runpod/track_challenge_usage.py refresh-billing --usage-scope challenge
 ```
 
 For the common one-shot case where the pod is already reachable and you want to track

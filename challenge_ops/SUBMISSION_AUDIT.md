@@ -10,7 +10,7 @@ This file is an audit template and checklist, not a replacement for the complian
 - Active candidate: `none recorded yet`
 - Submission intent: `not started`
 - Last completed preflight: `none recorded yet`
-- Latest gating evidence: clean remote control stabilization rerun `ablate_control_1xh100_20260320_runpod_stabilize` completed at `val_bpb=1.34849063`, materially worse than the adopted Runpod `1xH100` control anchor, the prior clean Runpod control retry, and the earlier remote `lr_warmdown` run, so workflow variance remains unresolved and no submission candidate was promoted.
+- Latest gating evidence: stable-profile remote control rerun `ablate_control_1xh100_20260320_runpod_stable` completed at `val_bpb=1.35280815` on a profile-matching US `26`-vCPU H100 pod, materially worse than the adopted Runpod `1xH100` control anchor, the prior clean Runpod control retries, and the earlier remote `lr_warmdown` run, so non-reproducibility remains unresolved and no submission candidate was promoted.
 
 ## Mandatory Checks
 

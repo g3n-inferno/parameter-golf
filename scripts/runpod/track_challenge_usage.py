@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import subprocess
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -150,23 +151,45 @@ def fetch_pod_config(pod_id: str) -> dict[str, Any]:
 
 
 def fetch_billing_window(pod_id: str, start_utc: str, end_utc: str) -> tuple[float, int]:
-    rows = run_runpodctl(
-        "billing",
-        "pods",
-        "--bucket-size",
-        "hour",
-        "--grouping",
-        "podId",
-        "--pod-id",
-        pod_id,
-        "--start-time",
-        start_utc,
-        "--end-time",
-        end_utc,
-    )
-    amount = sum(float(row.get("amount", 0.0)) for row in rows)
-    billed_ms = sum(int(float(row.get("timeBilledMs", 0))) for row in rows if row.get("timeBilledMs") is not None)
+    amount = 0.0
+    billed_ms = 0
+    for attempt in range(4):
+        rows = run_runpodctl(
+            "billing",
+            "pods",
+            "--bucket-size",
+            "hour",
+            "--grouping",
+            "podId",
+            "--pod-id",
+            pod_id,
+            "--start-time",
+            start_utc,
+            "--end-time",
+            end_utc,
+        )
+        amount = sum(float(row.get("amount", 0.0)) for row in rows)
+        billed_ms = sum(int(float(row.get("timeBilledMs", 0))) for row in rows if row.get("timeBilledMs") is not None)
+        if amount > 0.0 or billed_ms > 0:
+            break
+        if attempt < 3:
+            time.sleep(2.0)
     return amount, billed_ms
+
+
+def estimate_billing(duration_seconds: float, cost_per_hr_usd: str | None) -> tuple[float, int]:
+    if duration_seconds <= 0.0 or not cost_per_hr_usd:
+        return 0.0, 0
+    hourly_rate = float(cost_per_hr_usd)
+    return hourly_rate * (duration_seconds / 3600.0), int(round(duration_seconds * 1000.0))
+
+
+def append_note_bits(existing: str, *note_bits: str) -> str:
+    notes = [existing.strip()] if existing.strip() else []
+    for bit in note_bits:
+        if bit and bit not in existing:
+            notes.append(bit)
+    return "; ".join(notes)
 
 
 def seconds_between(start_utc: str, end_utc: str) -> float:
@@ -225,8 +248,15 @@ def command_finish_session(args: argparse.Namespace, paths: LedgerPaths) -> None
     end_utc = get_timestamp(args.ended_at)
     row["session_end_utc"] = end_utc
     if row.get("session_start_utc"):
-        row["session_seconds"] = f"{seconds_between(row['session_start_utc'], end_utc):.3f}"
+        duration_seconds = seconds_between(row["session_start_utc"], end_utc)
+        row["session_seconds"] = f"{duration_seconds:.3f}"
         amount, billed_ms = fetch_billing_window(row["pod_id"], row["session_start_utc"], end_utc)
+        if amount <= 0.0 and billed_ms <= 0:
+            amount, billed_ms = estimate_billing(duration_seconds, row.get("cost_per_hr_usd"))
+            row["notes"] = append_note_bits(
+                row.get("notes", ""),
+                "billing_source=estimated_duration_x_hourly_rate",
+            )
         row["billed_amount_usd"] = f"{amount:.8f}"
         row["billed_time_ms"] = str(billed_ms)
     session_runs = get_session_run_rows(paths, args.session_id)
@@ -266,12 +296,97 @@ def command_finish_run(args: argparse.Namespace, paths: LedgerPaths) -> None:
     session_row = require_row(session_rows, "session_id", run_row["session_id"])
     end_utc = get_timestamp(args.ended_at)
     run_row["run_end_utc"] = end_utc
-    run_row["run_seconds"] = f"{seconds_between(run_row['run_start_utc'], end_utc):.3f}"
+    duration_seconds = seconds_between(run_row["run_start_utc"], end_utc)
+    run_row["run_seconds"] = f"{duration_seconds:.3f}"
     amount, billed_ms = fetch_billing_window(session_row["pod_id"], run_row["run_start_utc"], end_utc)
+    if amount <= 0.0 and billed_ms <= 0:
+        amount, billed_ms = estimate_billing(duration_seconds, session_row.get("cost_per_hr_usd"))
+        run_row["notes"] = append_note_bits(
+            run_row.get("notes", ""),
+            "billing_source=estimated_duration_x_hourly_rate",
+        )
     run_row["billed_amount_usd"] = f"{amount:.8f}"
     run_row["billed_time_ms"] = str(billed_ms)
     write_rows(paths.runs, RUN_FIELDS, run_rows)
     print(f"finished run: {args.run_id}")
+
+
+def command_refresh_billing(args: argparse.Namespace, paths: LedgerPaths) -> None:
+    session_rows = read_rows(paths.sessions, SESSION_FIELDS)
+    run_rows = read_rows(paths.runs, RUN_FIELDS)
+
+    if args.session_id:
+        session_rows = [require_row(session_rows, "session_id", args.session_id)]
+    elif args.usage_scope:
+        session_rows = [row for row in session_rows if row.get("usage_scope") == args.usage_scope]
+
+    session_ids = {row["session_id"] for row in session_rows}
+    if args.run_id:
+        target_run = require_row(run_rows, "run_id", args.run_id)
+        run_rows = [target_run]
+        session_ids.add(target_run["session_id"])
+        session_rows = [row for row in read_rows(paths.sessions, SESSION_FIELDS) if row["session_id"] in session_ids]
+    else:
+        run_rows = [row for row in run_rows if row.get("session_id") in session_ids]
+
+    session_map = {row["session_id"]: row for row in read_rows(paths.sessions, SESSION_FIELDS)}
+    updated_runs = 0
+    updated_sessions = 0
+
+    for run_row in run_rows:
+        session_row = session_map[run_row["session_id"]]
+        if not run_row.get("run_start_utc") or not run_row.get("run_end_utc"):
+            continue
+        duration_seconds = seconds_between(run_row["run_start_utc"], run_row["run_end_utc"])
+        amount, billed_ms = fetch_billing_window(session_row["pod_id"], run_row["run_start_utc"], run_row["run_end_utc"])
+        if amount <= 0.0 and billed_ms <= 0:
+            amount, billed_ms = estimate_billing(duration_seconds, session_row.get("cost_per_hr_usd"))
+            run_row["notes"] = append_note_bits(
+                run_row.get("notes", ""),
+                "billing_source=estimated_duration_x_hourly_rate",
+            )
+        else:
+            run_row["notes"] = append_note_bits(
+                run_row.get("notes", ""),
+                "billing_source=runpod_api",
+            )
+        run_row["billed_amount_usd"] = f"{amount:.8f}"
+        run_row["billed_time_ms"] = str(billed_ms)
+        updated_runs += 1
+
+    for session_row in session_rows:
+        if not session_row.get("session_start_utc") or not session_row.get("session_end_utc"):
+            continue
+        duration_seconds = seconds_between(session_row["session_start_utc"], session_row["session_end_utc"])
+        amount, billed_ms = fetch_billing_window(session_row["pod_id"], session_row["session_start_utc"], session_row["session_end_utc"])
+        if amount <= 0.0 and billed_ms <= 0:
+            amount, billed_ms = estimate_billing(duration_seconds, session_row.get("cost_per_hr_usd"))
+            session_row["notes"] = append_note_bits(
+                session_row.get("notes", ""),
+                "billing_source=estimated_duration_x_hourly_rate",
+            )
+        else:
+            session_row["notes"] = append_note_bits(
+                session_row.get("notes", ""),
+                "billing_source=runpod_api",
+            )
+        session_row["billed_amount_usd"] = f"{amount:.8f}"
+        session_row["billed_time_ms"] = str(billed_ms)
+        updated_sessions += 1
+
+    all_session_rows = read_rows(paths.sessions, SESSION_FIELDS)
+    all_run_rows = read_rows(paths.runs, RUN_FIELDS)
+    by_session = {row["session_id"]: row for row in session_rows}
+    by_run = {row["run_id"]: row for row in run_rows}
+    for index, row in enumerate(all_session_rows):
+        if row["session_id"] in by_session:
+            all_session_rows[index] = by_session[row["session_id"]]
+    for index, row in enumerate(all_run_rows):
+        if row["run_id"] in by_run:
+            all_run_rows[index] = by_run[row["run_id"]]
+    write_rows(paths.sessions, SESSION_FIELDS, all_session_rows)
+    write_rows(paths.runs, RUN_FIELDS, all_run_rows)
+    print(f"refreshed billing: sessions={updated_sessions} runs={updated_runs}")
 
 
 def command_report(args: argparse.Namespace, paths: LedgerPaths) -> None:
@@ -399,6 +514,11 @@ def build_parser() -> argparse.ArgumentParser:
     finish_run.add_argument("--run-id", required=True)
     finish_run.add_argument("--ended-at")
 
+    refresh_billing = subparsers.add_parser("refresh-billing")
+    refresh_billing.add_argument("--session-id")
+    refresh_billing.add_argument("--run-id")
+    refresh_billing.add_argument("--usage-scope")
+
     report = subparsers.add_parser("report")
     report.add_argument("--usage-scope")
     report.add_argument("--challenge-credit-budget-usd", type=float, default=DEFAULT_CHALLENGE_CREDIT_BUDGET_USD)
@@ -434,6 +554,7 @@ def main() -> None:
         "finish-session": command_finish_session,
         "start-run": command_start_run,
         "finish-run": command_finish_run,
+        "refresh-billing": command_refresh_billing,
         "report": command_report,
         "run-command": command_run_command,
     }

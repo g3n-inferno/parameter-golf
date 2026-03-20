@@ -131,6 +131,8 @@ if [[ -z "$gpu_count" || "$gpu_count" -lt 1 ]]; then
   exit 1
 fi
 echo "verified gpu_count=$gpu_count"
+echo "host_name=$(hostname)"
+echo "host_vcpu_count=$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo unknown)"
 
 LAST_CONTEXT="verifying dataset, tokenizer, and torch environment"
 DATA_PATH="$DATA_PATH" TOKENIZER_PATH="$TOKENIZER_PATH" VOCAB_SIZE="$VOCAB_SIZE" EXPECTED_TRAIN_SHARDS="$EXPECTED_TRAIN_SHARDS" ALLOW_PARTIAL_DATA="$ALLOW_PARTIAL_DATA" "$PYTHON_BIN" - <<'PY'
