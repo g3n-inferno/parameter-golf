@@ -13,6 +13,16 @@ function Test-CommandAvailable {
     return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Get-FirstExistingPath {
+    param([Parameter(Mandatory = $true)][string[]]$Candidates)
+    foreach ($candidate in $Candidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            return $candidate
+        }
+    }
+    return $null
+}
+
 function Write-Status {
     param(
         [Parameter(Mandatory = $true)][string]$Label,
@@ -53,10 +63,42 @@ Write-Status -Label "ssh" -Ok $sshOk -Detail ($(if ($sshOk) { "available" } else
 if (-not $sshOk) { $requiredMissing = $true }
 
 $runpodctlOk = Test-CommandAvailable -Name "runpodctl"
-Write-Status -Label "runpodctl" -Ok $runpodctlOk -Detail ($(if ($runpodctlOk) { "available" } else { "optional, not found" }))
+$runpodctlKnownPath = Get-FirstExistingPath -Candidates @(
+    (Join-Path $env:LOCALAPPDATA "runpodctl\runpodctl.exe"),
+    (Join-Path $env:TEMP "runpodctl-install\runpodctl.exe")
+)
+$runpodctlDetail = if ($runpodctlOk) {
+    "available on PATH"
+} elseif ($runpodctlKnownPath) {
+    "found outside PATH at $runpodctlKnownPath; open a new shell or update PATH"
+} else {
+    "optional, not found"
+}
+Write-Status -Label "runpodctl" -Ok ($runpodctlOk -or ($null -ne $runpodctlKnownPath)) -Detail $runpodctlDetail
 
-$wslOk = Test-CommandAvailable -Name "wsl"
-Write-Status -Label "wsl" -Ok $wslOk -Detail ($(if ($wslOk) { "available for bash/rsync workflows" } else { "optional, not found" }))
+$flashOk = Test-CommandAvailable -Name "flash"
+$flashKnownPath = Get-FirstExistingPath -Candidates (
+    @(Get-ChildItem -Path (Join-Path $env:APPDATA "Python") -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { Join-Path $_.FullName "Scripts\flash.exe" })
+)
+$flashDetail = if ($flashOk) {
+    "available on PATH"
+} elseif ($flashKnownPath) {
+    "found outside PATH at $flashKnownPath; open a new shell or update PATH"
+} else {
+    "optional, not found"
+}
+Write-Status -Label "flash" -Ok ($flashOk -or ($null -ne $flashKnownPath)) -Detail $flashDetail
+
+$wslCmdOk = Test-CommandAvailable -Name "wsl"
+if ($wslCmdOk) {
+    $wslList = (& wsl -l -q 2>&1 | Out-String).Trim()
+    $wslHasDistro = -not [string]::IsNullOrWhiteSpace($wslList) -and ($wslList -notmatch "no installed distributions")
+    $wslDetail = if ($wslHasDistro) { "available with installed distro(s)" } else { "optional, command exists but no distro is installed" }
+    Write-Status -Label "wsl" -Ok $wslHasDistro -Detail $wslDetail
+} else {
+    Write-Status -Label "wsl" -Ok $false -Detail "optional, not found"
+}
 
 $sshConfigPath = Join-Path ([Environment]::GetFolderPath("UserProfile")) ".ssh\config"
 $sshConfigOk = Test-Path -LiteralPath $sshConfigPath
@@ -85,7 +127,7 @@ if ($authHintPaths | Where-Object { Test-Path -LiteralPath $_ }) {
     $authHintFound = $true
 }
 
-if ($runpodctlOk) {
+if ($runpodctlOk -or $runpodctlKnownPath) {
     $authMessage = if ($authHintFound) {
         "auth hint detected; still verify against current runpodctl prompts"
     } else {

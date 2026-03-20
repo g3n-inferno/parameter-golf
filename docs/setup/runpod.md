@@ -20,8 +20,12 @@ It prepares the repo side only. You still create or destroy Pods manually in the
 - `scripts/runpod/download_sp1024.sh`
 - `scripts/runpod/run_baseline_1gpu.sh`
 - `scripts/runpod/run_track_8gpu.sh`
+- `scripts/experiments/smoke_local_or_remote.sh`
+- `scripts/experiments/run_baseline_1gpu.sh`
+- `scripts/experiments/parse_train_log.py`
 - `scripts/runpod/rsync_examples.md`
 - `docs/setup/runpod_checklist.md`
+- `docs/experiments/baseline_repro.md`
 
 ## Local Prerequisites
 
@@ -91,12 +95,21 @@ Reconnect from Windsurf:
 2. Open the folder `/workspace/parameter-golf`.
 3. Use the same terminal commands documented below so Codex and Windsurf stay on one layout.
 
+If SSH metadata exists but the port is still closed, try Jupyter at:
+
+```text
+https://<pod-id>-8888.proxy.runpod.net
+```
+
+The official Parameter Golf image currently uses `JUPYTER_PASSWORD=parameter-golf`.
+
 ## Bootstrap The Pod
 
 On a brand new Pod, do a first clone manually because the helper scripts live inside the repo:
 
 ```bash
 cd /workspace
+rm -rf /workspace/parameter-golf
 git clone https://github.com/<you>/parameter-golf.git parameter-golf
 cd /workspace/parameter-golf
 ```
@@ -121,6 +134,9 @@ Behavior after the repo already exists locally on the Pod:
 - Ensures `origin` points at your fork when `FORK_URL` is provided.
 - Ensures `upstream` exists and defaults to the official OpenAI repo.
 - Fetches both remotes without force-pushing, rebasing, or resetting.
+
+Important operational note:
+- Some official template pods create `/workspace/parameter-golf` as a stub directory, not a real git checkout. Verify `/workspace/parameter-golf/.git` exists before relying on that path.
 
 ## Verify The Pod Environment
 
@@ -155,22 +171,35 @@ TRAIN_SHARDS=1 bash scripts/runpod/download_sp1024.sh
 
 The script logs to `logs/runpod/download_sp1024*.log`.
 
+For the baseline-reproduction path, prefer the explicit full download command:
+
+```bash
+python3 data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80
+```
+
+Check disk headroom before the full baseline download. On the official `1xH100` pod used here, the `sp1024` dataset consumed about `16G` on a `20G` container disk.
+
 ## Start The 1xH100 Baseline
 
 Run:
 
 ```bash
 cd /workspace/parameter-golf
-bash scripts/runpod/run_baseline_1gpu.sh
+TARGET_GPU_LABEL=h100 \
+RUN_ID=baseline_sp1024_h100 \
+VAL_LOSS_EVERY=200 \
+bash scripts/experiments/run_baseline_1gpu.sh
 ```
 
-This wraps the documented baseline:
+This is the preferred documented baseline path now because it wraps the documented baseline:
 - `DATA_PATH=./data/datasets/fineweb10B_sp1024/`
 - `TOKENIZER_PATH=./data/tokenizers/fineweb_1024_bpe.model`
 - `VOCAB_SIZE=1024`
 - `torchrun --standalone --nproc_per_node=1 train_gpt.py`
+- preserves the default trainer wallclock cap unless explicitly overridden
+- writes parsed summaries under `logs/experiments/baseline_1gpu/`
 
-Logs are written to `logs/runpod/`.
+The older `scripts/runpod/run_baseline_1gpu.sh` wrapper still exists as a compatibility helper, but the `scripts/experiments/` wrapper is the better baseline reproduction entrypoint.
 
 ## Start A Later 8xH100 Track Run
 
@@ -223,7 +252,8 @@ If you need auth, follow the current Runpod prompts on your machine rather than 
 
 ## Logs And Artifacts
 
-- Wrapper logs: `logs/runpod/`
+- Runpod helper logs: `logs/runpod/`
+- Experiment wrapper logs and summaries: `logs/experiments/`
 - Temporary experiment outputs: `artifacts/runpod/`
 - Formal submission-ready outputs: a new folder under `records/`
 
