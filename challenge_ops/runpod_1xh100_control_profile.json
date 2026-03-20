@@ -1,0 +1,19 @@
+{
+  "profile_label": "runpod_1xh100_control_anchor_us_h100_26vcpu",
+  "gpu_id": "NVIDIA H100 80GB HBM3",
+  "gpu_count": 1,
+  "image_name": "runpod/parameter-golf:latest",
+  "container_disk_gb": 20,
+  "volume_gb": 0,
+  "memory_gb": 251,
+  "secure_cloud": true,
+  "min_vcpu_count": 26,
+  "allowed_data_center_ids": [
+    "US-NE-1",
+    "US-MO-1"
+  ],
+  "allowed_locations": [
+    "US"
+  ],
+  "notes": "Use the same stopped pod if possible. Otherwise, only accept a fresh pod that matches this declared control-profile policy before running control-path experiments."
+}
