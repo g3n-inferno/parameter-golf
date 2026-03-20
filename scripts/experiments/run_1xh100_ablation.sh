@@ -8,6 +8,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 EXPERIMENT_ID="${EXPERIMENT_ID:-${1:-}}"
 LOG_ROOT_BASE="${LOG_ROOT_BASE:-$REPO_DIR/logs/experiments/next_1xh100_workstream}"
 BASELINE_COMPARE_JSON="${BASELINE_COMPARE_JSON:-$REPO_DIR/experiments/baselines/local_1xh100_baseline_summary.json}"
+BASELINE_COMPARE_LABEL="${BASELINE_COMPARE_LABEL:-runpod_1xh100_control_anchor}"
 SHARD_SCORE_ROOT="${SHARD_SCORE_ROOT:-$REPO_DIR/artifacts/shard_scores}"
 
 usage() {
@@ -28,8 +29,10 @@ Supported experiment_id values:
 
 This wrapper preserves the documented 1xH100 baseline path and only layers named
 env-var ablations on top. It also refreshes experiments/ledger.csv from the
-parsed summary JSON and compares each run against the local 1xH100 baseline
-anchor when experiments/baselines/local_1xh100_baseline_summary.json exists.
+parsed summary JSON and compares each run against the Runpod 1xH100 control
+anchor. The legacy compatibility file
+experiments/baselines/local_1xh100_baseline_summary.json retains its old name,
+but it stores the Runpod `1xH100` anchor, not a local-machine run.
 EOF
 }
 
@@ -61,6 +64,7 @@ TOKENIZER_VARIANT="${TOKENIZER_VARIANT:-fineweb_1024_bpe.model}"
 TARGET_GPU_LABEL="${TARGET_GPU_LABEL:-h100}"
 TRACK_INTENT="${TRACK_INTENT:-non-record}"
 WALLCLOCK_TARGET="${WALLCLOCK_TARGET:-600s}"
+EXPERIMENT_HARDWARE="${EXPERIMENT_HARDWARE:-Runpod 1xH100 pod}"
 DATA_PATH_VALUE="${DATA_PATH:-$REPO_DIR/data/datasets/fineweb10B_sp1024}"
 TOKENIZER_PATH_VALUE="${TOKENIZER_PATH:-$REPO_DIR/data/tokenizers/fineweb_1024_bpe.model}"
 VOCAB_SIZE_VALUE="${VOCAB_SIZE:-1024}"
@@ -83,7 +87,7 @@ case "$EXPERIMENT_ID" in
   control)
     RUN_ID="${RUN_ID:-ablate_control_1xh100_1024}"
     CORE_HPARAMS="seq1024 9x512 kv4 mlp_mult2 tied_emb baseline_schedule"
-    NOTES="control run near the current local 1xH100 baseline path"
+    NOTES="control run near the current Runpod 1xH100 control-anchor path"
     experiment_env=()
     ;;
   fp16_embed)
@@ -188,7 +192,7 @@ fi
   --dataset-variant "$DATASET_VARIANT" \
   --tokenizer-variant "$TOKENIZER_VARIANT" \
   --core-hparams "$CORE_HPARAMS" \
-  --hardware "1xH100" \
+  --hardware "$EXPERIMENT_HARDWARE" \
   --track-intent "$TRACK_INTENT" \
   --code-path "train_gpt.py" \
   --wallclock-target "$WALLCLOCK_TARGET" \
@@ -220,7 +224,7 @@ compare_args=()
 if [[ -f "$BASELINE_COMPARE_JSON" ]]; then
   compare_args=(
     "--compare-json" "$BASELINE_COMPARE_JSON"
-    "--compare-label" "local_1xh100_baseline"
+    "--compare-label" "$BASELINE_COMPARE_LABEL"
   )
 fi
 

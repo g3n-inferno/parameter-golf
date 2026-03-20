@@ -10,7 +10,7 @@ This file is an audit template and checklist, not a replacement for the complian
 - Active candidate: `none recorded yet`
 - Submission intent: `not started`
 - Last completed preflight: `none recorded yet`
-- Latest gating evidence: `ablate_lr_warmdown_1xh100_20260320_runpod` regressed to `val_bpb=1.33058722` on `1xH100-surrogate`, so no submission candidate was promoted from this run.
+- Latest gating evidence: clean remote control retry `ablate_control_1xh100_20260320_runpod_retry2` completed at `val_bpb=1.33518228`, materially worse than the current Runpod `1xH100` control anchor and slightly worse than the earlier remote `lr_warmdown` run, so workflow variance remains unresolved and no submission candidate was promoted.
 
 ## Mandatory Checks
 

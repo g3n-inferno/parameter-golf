@@ -24,7 +24,7 @@
 
 - `dataset_variant`:
 - `tokenizer_variant`:
-- `hardware`:
+- `hardware`: use explicit locality wording such as `local machine` or `Runpod 1xH100 pod`
 - `wallclock_target`:
 - `core_hparams`:
 - `exact_command`:
