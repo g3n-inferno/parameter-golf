@@ -49,6 +49,38 @@ Follow this order unless the task is tightly scoped and already localized:
 4. Experiment tracking.
 5. Submission safety checks.
 
+## Challenge Coordination System
+
+Use the repo-local coordination layer under `challenge_ops/` as the durable handoff and memory surface for Codex, the Project GPT, and Codex subagents.
+This coordination layer does not replace `experiments/ledger.csv`, `/records`, or the existing compliance scripts. It standardizes how conclusions, idea lineage, and submission readiness are reported.
+
+### Roles
+
+- `Project GPT`: control tower, experiment strategist, reviewer, terminology normalizer, and challenge-memory consumer.
+- `Codex`: implementation engine, investigator, patch author, run operator, and artifact producer.
+- `Subagents`: scoped specialists for repo mapping, ML design, systems, QA, submission review, experiment history, and ops. In this repo, keep subagent scopes compatible with `.codex/agents/*.toml`.
+
+### Coordination Files
+
+- `challenge_ops/CURRENT_FRONTIER.md`: quick-read memory for the best known result, strongest anchors, promising next step, artifact headroom, and terminology reminders.
+- `challenge_ops/TRIED_IDEAS_INDEX.md`: idea-family index used to decide whether a proposal is novel, a variant, or already tried.
+- `challenge_ops/TERMINOLOGY_CROSSWALK.md`: normalization map from informal wording to standard terms.
+- `challenge_ops/SUBMISSION_AUDIT.md`: pre-submission evidence and checklist surface.
+- `challenge_ops/templates/`: standard templates for handoffs, experiment briefs, results, and submission audits.
+
+### Required Reporting Rules
+
+- Nontrivial tasks must end with a standard Codex handoff summary using the structure in `challenge_ops/templates/codex_handoff.md`.
+- Meaningful experiments must produce or update structured `challenge_ops` artifacts. At minimum:
+  - update or reference `challenge_ops/TRIED_IDEAS_INDEX.md`
+  - emit an experiment result packet using the repo-standard markdown plus JSON sidecar format
+  - keep `experiments/ledger.csv` as the numeric source of truth for meaningful run rows
+- Distinguish confirmed findings from inferred conclusions.
+- Report exact files changed, exact commands run, and exact metrics observed.
+- Treat challenge legality, reproducibility, and counted artifact size as first-class constraints.
+- Before calling an idea `novel`, check whether it is already represented in `challenge_ops/TRIED_IDEAS_INDEX.md`.
+- When a new result materially changes understanding, update `challenge_ops/CURRENT_FRONTIER.md` and any related index rows in the same task.
+
 ### Repo Mapping
 
 - Read the challenge rules in `README.md` before changing workflows or packaging anything.
@@ -90,6 +122,7 @@ Follow this order unless the task is tightly scoped and already localized:
 - Keep experiment summaries concise and reproducible.
 - Use `experiments/ledger.csv` as the lightweight local source of truth for meaningful runs.
 - Use `scripts/experiments/new_experiment.py`, `scripts/experiments/update_ledger.py`, and `scripts/experiments/summarize_candidates.py` instead of ad hoc notes when possible.
+- Use `scripts/experiments/generate_experiment_result.py` when a training log plus optional metadata should be turned into the standard markdown plus JSON result packet.
 - For any Runpod challenge run, also maintain `experiments/runpod_sessions.csv` and `experiments/runpod_runs.csv` via `scripts/runpod/track_challenge_usage.py` so pod config, init time, run time, billed time, and billed cost are auditable.
 
 ### Submission Safety Checks
