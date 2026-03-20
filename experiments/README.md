@@ -23,6 +23,15 @@ python scripts/experiments/update_ledger.py --run-id my_run --val-bpb 1.32 --byt
 python scripts/experiments/summarize_candidates.py
 ```
 
+For the current compact 1xH100 workstream, use:
+
+```bash
+bash scripts/experiments/run_1xh100_ablation.sh control
+```
+
+That wrapper keeps the baseline command path, refreshes the ledger from the parsed
+summary JSON, and compares against `experiments/baselines/local_1xh100_baseline_summary.json`.
+
 ## Ledger Conventions
 
 Each meaningful run should track at least:

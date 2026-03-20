@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -52,6 +53,12 @@ def write_rows(path: Path, rows: list[dict[str, str]]) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True, help="Run identifier to update.")
+    parser.add_argument(
+        "--summary-json",
+        type=Path,
+        default=None,
+        help="Optional parsed summary JSON to import val/byte fields from.",
+    )
     parser.add_argument("--branch")
     parser.add_argument("--date")
     parser.add_argument("--dataset-variant")
@@ -83,6 +90,42 @@ def main() -> int:
         print(f"error: run_id not found in ledger: {args.run_id}", file=sys.stderr)
         return 1
 
+    summary_updates: dict[str, str | None] = {}
+    note_bits: list[str] = []
+    if args.summary_json is not None:
+        summary_path = (root / args.summary_json).resolve() if not args.summary_json.is_absolute() else args.summary_json.resolve()
+        if not summary_path.exists():
+            print(f"error: summary JSON does not exist: {summary_path}", file=sys.stderr)
+            return 1
+        parsed = json.loads(summary_path.read_text(encoding="utf-8"))
+        summary_updates = {
+            "val_loss": str(parsed["final_val_loss"]) if parsed.get("final_val_loss") is not None else None,
+            "val_bpb": str(parsed["final_val_bpb"]) if parsed.get("final_val_bpb") is not None else None,
+            "bytes_model": (
+                str(parsed["model_int8_zlib_bytes"])
+                if parsed.get("model_int8_zlib_bytes") is not None
+                else (str(parsed["model_bytes"]) if parsed.get("model_bytes") is not None else None)
+            ),
+            "bytes_code": str(parsed["code_bytes"]) if parsed.get("code_bytes") is not None else None,
+            "bytes_total": (
+                str(parsed["total_submission_size_int8_zlib_bytes"])
+                if parsed.get("total_submission_size_int8_zlib_bytes") is not None
+                else (
+                    str(parsed["total_submission_size_bytes"])
+                    if parsed.get("total_submission_size_bytes") is not None
+                    else None
+                )
+            ),
+        }
+        if parsed.get("stop_reason"):
+            note_bits.append(f"stop_reason={parsed['stop_reason']}")
+        if parsed.get("stop_step") is not None:
+            note_bits.append(f"stop_step={parsed['stop_step']}")
+        if parsed.get("comparison", {}).get("label") and parsed["comparison"].get("delta_val_bpb") is not None:
+            note_bits.append(
+                f"delta_val_bpb_vs_{parsed['comparison']['label']}={parsed['comparison']['delta_val_bpb']:+.8f}"
+            )
+
     updates = {
         "branch": args.branch,
         "date": args.date,
@@ -100,6 +143,14 @@ def main() -> int:
         "code_path": args.code_path,
         "wallclock_target": args.wallclock_target,
     }
+    updates.update(summary_updates)
+    if args.notes is not None:
+        updates["notes"] = args.notes
+    elif note_bits:
+        existing_notes = target.get("notes", "").strip()
+        filtered_bits = [bit for bit in note_bits if bit not in existing_notes]
+        auto_notes = "; ".join(filtered_bits)
+        updates["notes"] = f"{existing_notes}; {auto_notes}".strip("; ") if existing_notes else auto_notes
     changed = False
     for key, value in updates.items():
         if value is not None:
