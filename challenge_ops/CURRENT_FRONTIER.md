@@ -27,8 +27,8 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 | Anchor | Scope | Exact `val_bpb` | Notes |
 | --- | --- | ---: | --- |
 | `Naive Baseline` | `8xH100-leaderboard` | `1.22436570` | Public leaderboard baseline and record-track comparison anchor. |
-| `baseline_sp1024_h100_local_20260319` | `1xH100-surrogate` | `1.32321114` | Local baseline summary used for current ablations. |
-| `ablate_control_1xh100_1024` | `1xH100-surrogate` | `1.32157507` | Most direct local control rerun near current baseline path. |
+| `baseline_sp1024_h100_local_20260319` | `1xH100-surrogate` | `1.32321114` | Legacy-named baseline summary from a Runpod `1xH100` pod; keep the run ID for compatibility. |
+| `ablate_control_1xh100_1024` | `1xH100-surrogate` | `1.32157507` | Direct Runpod `1xH100` control rerun near the current surrogate anchor path. |
 
 ## Known Good Ideas
 
@@ -47,10 +47,14 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 
 ## Known Mixed Or Inconclusive Ideas
 
+- `control_1xh100`
+  - Standardized name: `runpod_1xh100_control_anchor`
+  - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
+  - Evidence: Runpod-surrogate `ablate_control_1xh100_1024` reached `val_bpb=1.32157507`, but fresh single-pod Runpod retry `ablate_control_1xh100_20260320_runpod_retry2` landed at `1.33518228`.
 - `lr_warmdown`
   - Standardized name: `longer_warmdown_schedule`
   - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
-  - Evidence: local `ablate_lr_warmdown_1xh100_1024` reached `val_bpb=1.31909196`, but remote Runpod rerun `ablate_lr_warmdown_1xh100_20260320_runpod` regressed to `1.33058722` on the same nominal scope.
+  - Evidence: earlier `1xH100-surrogate` run `ablate_lr_warmdown_1xh100_1024` reached `val_bpb=1.31909196`, but remote Runpod rerun `ablate_lr_warmdown_1xh100_20260320_runpod` regressed to `1.33058722`, and the clean remote control retry was even worse at `1.33518228`.
 
 ## Known Weak Or Negative Ideas
 
@@ -58,28 +62,32 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - Standardized name: `compound_longer_context_1536_probe`
   - Verdict: `variant / already-tried / negative / non-record @ 1xH100-surrogate`
   - Evidence: `ablate_compound_ctx1536_1xh100` regressed to `1.32518999`.
-- `fp16_embed_local_probe`
-  - Standardized name: `fp16_tied_embedding_local_probe`
+- `fp16_embed_1xh100_probe`
+  - Standardized name: `fp16_tied_embedding_1xh100_probe`
   - Verdict: `variant / already-tried / negative / non-record @ 1xH100-surrogate`
   - Evidence: `ablate_fp16_embed_1xh100_1024` regressed to `1.32389328`.
 
 ## Biggest Bottleneck
 
-- Confirmed: `1xH100-surrogate` reproducibility is now a bottleneck, because the strongest local `lr_warmdown` win did not reproduce on a real Runpod H100 SXM rerun.
-- Inferred: before promoting schedule tweaks toward leaderboard-relevant work, the project needs a cleaner remote control anchor on the same pod workflow to separate infrastructure variance from idea quality.
+- Confirmed: `1xH100-surrogate` reproducibility is now a bottleneck, because the strongest earlier `lr_warmdown` win did not reproduce on a real Runpod H100 SXM rerun.
+- Confirmed: the fresh single-pod remote control retry `ablate_control_1xh100_20260320_runpod_retry2` completed at `val_bpb=1.33518228`, which is `+0.01360721` worse than the current Runpod `1xH100` control anchor and `+0.00459506` worse than the earlier remote `lr_warmdown` run.
+- Inferred: the dominant issue is workflow variance on the Runpod `1xH100-surrogate` path, not an idea-specific `lr_warmdown` miss, and more paid ablations should pause until that control path is reliable.
 
 ## Most Promising Next Experiment
 
-- Candidate: remote control rerun on the same Runpod H100 SXM workflow before spending more expensive comparison runs.
-- Standardized name: `local_control_baseline_rerun`
+- Candidate: a narrow Runpod control-path stabilization pass for the fresh-boot remote control path before any more paid ablations.
+- Standardized name: `runpod_1xh100_control_anchor`
 - Why:
-  - Confirmed remote `lr_warmdown` evidence is worse than both the local baseline anchor and the local control rerun.
-  - A same-infrastructure control rerun is the cheapest way to determine whether the regression came from environment variance or the schedule tweak itself.
-  - Dataset, tokenizer, and training path can stay unchanged while clarifying the next decision.
+  - Confirmed the clean remote control retry completed and still landed materially worse than the existing Runpod `1xH100` surrogate anchors.
+  - Confirmed the clean remote control retry was also worse than the earlier remote `lr_warmdown` run, so the workflow itself is now the strongest confounder.
+  - The highest-value next move is to make the exact control path reliable, not to spend more money on another ablation variant.
 - Guardrails before any expensive run:
   - keep dataset and tokenizer unchanged
   - keep result reporting apples to apples
   - predeclare anchor, scope, and success threshold in an experiment brief
+  - use one pod and one operator thread only; do not allow parallel agents to touch Runpod
+  - verify the pod still has a real repo checkout after start or resume; if not, reclone before any dataset or training step
+  - stop after a grounded infra failure rather than spending more paid ablation time on an unstable pod
   - run submission and artifact checks before claiming record relevance
 
 ## Artifact Budget View
@@ -91,9 +99,10 @@ Artifact cap: `16000000` bytes
 | `Naive Baseline` | `8xH100-leaderboard` | `15863489` | `136511` |
 | `Long Context Seq2048 v2` | `8xH100-leaderboard` | `15867270` | `132730` |
 | `Sliding Window Eval` | `8xH100-leaderboard` | `15874829` | `125171` |
-| `local_1xh100_baseline_summary` | `1xH100-surrogate` | `14037860` | `1962140` |
+| `local_1xh100_baseline_summary` (legacy alias for `runpod_1xh100_control_anchor`) | `1xH100-surrogate` | `14037860` | `1962140` |
 | `ablate_lr_warmdown_1xh100_1024` | `1xH100-surrogate` | `12455545` | `3544455` |
 | `ablate_lr_warmdown_1xh100_20260320_runpod` | `1xH100-surrogate` | `12053652` | `3946348` |
+| `ablate_control_1xh100_20260320_runpod_retry2` | `1xH100-surrogate` | `13673535` | `2326465` |
 
 ## Terminology Reminders
 

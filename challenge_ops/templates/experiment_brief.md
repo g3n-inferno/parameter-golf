@@ -16,6 +16,7 @@ Use this template before a meaningful experiment, packaging attempt, or submissi
 - `state`: `frontier | already-tried`
 - `intent`: `non-record | track-candidate`
 - `scope`: `smoke-path | 1xH100-surrogate | 8xH100-leaderboard | non-record-unlimited | records-preflight`
+- Hardware wording note: spell out locality separately in prose, for example `local machine` or `Runpod 1xH100 pod`; do not use `local` as shorthand for `1xH100-surrogate`.
 
 ## Objective
 

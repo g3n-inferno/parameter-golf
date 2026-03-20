@@ -4,8 +4,8 @@ This note chooses the next 1xH100-only workstream from the current repo state an
 
 ## Why This Workstream
 
-- The local `1xH100` baseline anchor is `val_bpb=1.32321114` with `14,037,860` total int8+zlib bytes and a `wallclock_cap` stop at step `1444`.
-- The public `8xH100` naive baseline is `1.2244`, so the local anchor is behind by about `+0.0988` BPB and should be treated as a cheap iteration surrogate, not a leaderboard-comparable result.
+- The current Runpod `1xH100` surrogate anchor is `val_bpb=1.32321114` with `14,037,860` total int8+zlib bytes and a `wallclock_cap` stop at step `1444`.
+- The public `8xH100` naive baseline is `1.2244`, so the Runpod surrogate anchor is behind by about `+0.0988` BPB and should be treated as a cheap iteration surrogate, not a leaderboard-comparable result.
 - The public `4-hour` non-record baseline reached `1.2074`, which says extra compute on the same 9x512 layout is useful but not the first lever to test.
 - The cleanest public low-risk gains came from:
   - fp16 tied-embedding export plus modest size compensation and LR/warmdown tuning
@@ -55,14 +55,14 @@ The wrapper:
 - uses the existing `scripts/experiments/run_baseline_1gpu.sh` path
 - writes timestamped logs under `logs/experiments/next_1xh100_workstream/`
 - refreshes `experiments/ledger.csv`
-- compares each run against `experiments/baselines/local_1xh100_baseline_summary.json`
+- compares each run against the legacy compatibility file `experiments/baselines/local_1xh100_baseline_summary.json`, which stores the Runpod `1xH100` control anchor
 - checks the artifact cap from the parsed summary JSON
 
 ## Matrix Summary
 
 ### `control`
 
-- Goal: refresh the local anchor under the same baseline-family command shape
+- Goal: refresh the Runpod `1xH100` control anchor under the same baseline-family command shape
 - Expected win: `val_bpb < 1.3232`
 - Risk: low artifact and compliance risk
 
@@ -76,7 +76,7 @@ The wrapper:
 
 - Change: `WARMDOWN_ITERS=3600`, `MATRIX_LR=0.06`
 - Goal: adapt the schedule to the very low step count seen on `1xH100`
-- Expected win: `>= 0.01` BPB improvement versus the local anchor
+- Expected win: `>= 0.01` BPB improvement versus the Runpod `1xH100` control anchor
 
 ### `compound_ctx1536`
 
@@ -86,6 +86,6 @@ The wrapper:
 
 ## Stop / Continue Rule
 
-- Continue this workstream if either `fp16_embed` or `lr_warmdown` improves the local anchor by about `0.01` BPB or more.
+- Continue this workstream if either `fp16_embed` or `lr_warmdown` improves the Runpod `1xH100` control anchor by about `0.01` BPB or more.
 - Escalate to a dedicated `2048` context follow-up only if at least one of those low-risk runs wins cleanly and remains comfortable on artifact size.
 - Do not move to `8xH100` candidate work yet unless a `1xH100` run lands near the public naive baseline proxy zone and the same change remains packaging-safe.

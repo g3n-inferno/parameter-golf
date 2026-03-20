@@ -19,8 +19,8 @@ Use this template before a meaningful experiment, packaging attempt, or submissi
 
 ## Objective
 
-- What is being tested: run one real remote `1xH100` reproduction of the repo-supported `lr_warmdown` ablation using the standard wrapper, unchanged tokenizer, and unchanged `sp1024` dataset path.
-- Why now: this is the strongest positive local schedule-style signal in current repo memory and it exercises the new `challenge_ops` coordination workflow end to end on a cheap apples-to-apples surrogate path.
+- What is being tested: run one real remote `1xH100` reproduction of the repo-supported `lr_warmdown` ablation on a Runpod `1xH100` pod using the standard wrapper, unchanged tokenizer, and unchanged `sp1024` dataset path.
+- Why now: this is the strongest positive earlier schedule-style signal in current repo memory and it exercises the new `challenge_ops` coordination workflow end to end on a cheap apples-to-apples surrogate path.
 
 ## Anchor And Novelty Check
 
@@ -33,13 +33,13 @@ Use this template before a meaningful experiment, packaging attempt, or submissi
 
 - Code path: `train_gpt.py` through `scripts/experiments/run_1xh100_ablation.sh`
 - Dataset/tokenizer variant: `fineweb10B_sp1024` with `fineweb_1024_bpe.model`
-- Hardware target: `1xH100`
+- Hardware target: `Runpod 1xH100 pod`
 - Wallclock target: `600s`
 - Exact planned command: `RUN_ID=ablate_lr_warmdown_1xh100_20260320_runpod TARGET_GPU_LABEL=h100_sxm bash scripts/experiments/run_1xh100_ablation.sh lr_warmdown`
 
 ## Success And Failure Criteria
 
-- Success threshold: final parsed metrics present and `val_bpb <= 1.32157507` so the remote rerun at least preserves the current local positive signal against the control anchor.
+- Success threshold: final parsed metrics present and `val_bpb <= 1.32157507` so the remote rerun at least preserves the current Runpod-control signal against the control anchor.
 - Failure threshold: final parsed metrics present and `val_bpb > 1.32157507`, or the run violates the documented apples-to-apples dataset/tokenizer path.
 - What would count as inconclusive: infra failure, incomplete dataset, missing final metrics, or a run that finishes with confounded setup differences from the standard wrapper path.
 

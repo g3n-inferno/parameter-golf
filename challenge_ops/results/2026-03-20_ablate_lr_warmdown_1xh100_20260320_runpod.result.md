@@ -46,7 +46,7 @@
 
 ## Comparison
 
-- `comparison.label`: local_1xh100_baseline
+- `comparison.label`: runpod_1xh100_control_anchor
 - `comparison.delta_val_loss`: 0.01245420
 - `comparison.delta_val_bpb`: 0.00737608
 - `comparison.delta_bytes_total`: -1984208
@@ -58,11 +58,11 @@
 - Runpod pod 9p5aq98sa8j6go was a usable 1x NVIDIA H100 80GB HBM3 pod and the remote checkout matched local main at c157a6ff2c32395465e39ba6a387364bcf8c2c99.
 - The remote sp1024 dataset path contained 80 training shards, 1 validation shard, and the expected fineweb_1024_bpe.model tokenizer before training.
 - The run finished with final_int8_zlib_roundtrip_exact val_loss=2.24664078, val_bpb=1.33058722, total_submission_size_int8_zlib_bytes=12053652, stop_step=1343, and final_eval_time_ms=11088.
-- Relative to experiments/baselines/local_1xh100_baseline_summary.json, delta_val_bpb was +0.00737608 and delta_val_loss was +0.01245420.
+- Relative to the legacy compatibility file `experiments/baselines/local_1xh100_baseline_summary.json`, which stores the Runpod `1xH100` control anchor, delta_val_bpb was +0.00737608 and delta_val_loss was +0.01245420.
 
 ## Inferred Conclusions
 
-- This remote rerun does not reproduce the earlier local positive lr_warmdown signal on the 1xH100 surrogate path.
+- This remote rerun does not reproduce the earlier Runpod-control-relative `lr_warmdown` signal on the `1xH100-surrogate` path.
 - The lr_warmdown idea family should be treated as mixed or inconclusive at 1xH100-surrogate scope until another clean rerun explains the gap.
 
 ## Notes
