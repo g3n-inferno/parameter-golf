@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import glob
 import io
+import json
 import math
 import os
 import random
@@ -86,6 +87,19 @@ class Hyperparameters:
     beta2 = float(os.environ.get("BETA2", 0.95))
     adam_eps = float(os.environ.get("ADAM_EPS", 1e-8))
     grad_clip_norm = float(os.environ.get("GRAD_CLIP_NORM", 0.0))
+
+    # Training-loss and data-order ablations.
+    train_loss_mode = os.environ.get("TRAIN_LOSS_MODE", "token_ce")
+    shard_score_path = os.environ.get("SHARD_SCORE_PATH", "")
+    train_shard_order = os.environ.get("TRAIN_SHARD_ORDER", "lexicographic")
+    train_shard_filter = os.environ.get("TRAIN_SHARD_FILTER", "all")
+    train_shard_filter_fraction = float(os.environ.get("TRAIN_SHARD_FILTER_FRACTION", 1.0))
+
+    # Shared-depth ablations.
+    shared_depth_mode = os.environ.get("SHARED_DEPTH_MODE", "off")
+    shared_depth_unique_blocks = int(os.environ.get("SHARED_DEPTH_UNIQUE_BLOCKS", 0))
+    shared_depth_total_passes = int(os.environ.get("SHARED_DEPTH_TOTAL_PASSES", 0))
+    shared_depth_residual_scale_mode = os.environ.get("SHARED_DEPTH_RESIDUAL_SCALE_MODE", "off")
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -205,6 +219,18 @@ def build_sentencepiece_luts(
     )
 
 
+def compute_token_byte_values(
+    prev_ids: Tensor,
+    tgt_ids: Tensor,
+    base_bytes_lut: Tensor,
+    has_leading_space_lut: Tensor,
+    is_boundary_token_lut: Tensor,
+) -> Tensor:
+    token_bytes = base_bytes_lut[tgt_ids].to(dtype=torch.int32)
+    token_bytes += (has_leading_space_lut[tgt_ids] & ~is_boundary_token_lut[prev_ids]).to(dtype=torch.int32)
+    return token_bytes
+
+
 def load_validation_tokens(pattern: str, seq_len: int) -> Tensor:
     files = [Path(p) for p in sorted(glob.glob(pattern))]
     if not files:
@@ -257,14 +283,26 @@ def eval_val(
             x = local[:-1].reshape(-1, args.train_seq_len)
             y = local[1:].reshape(-1, args.train_seq_len)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                batch_loss = model(x, y).detach()
+                batch_loss, _, _, _ = model(
+                    x,
+                    y,
+                    base_bytes_lut,
+                    has_leading_space_lut,
+                    is_boundary_token_lut,
+                )
+                batch_loss = batch_loss.detach()
             batch_token_count = float(y.numel())
             val_loss_sum += batch_loss.to(torch.float64) * batch_token_count
             val_token_count += batch_token_count
             prev_ids = x.reshape(-1)
             tgt_ids = y.reshape(-1)
-            token_bytes = base_bytes_lut[tgt_ids].to(dtype=torch.int16)
-            token_bytes += (has_leading_space_lut[tgt_ids] & ~is_boundary_token_lut[prev_ids]).to(dtype=torch.int16)
+            token_bytes = compute_token_byte_values(
+                prev_ids,
+                tgt_ids,
+                base_bytes_lut,
+                has_leading_space_lut,
+                is_boundary_token_lut,
+            )
             val_byte_count += token_bytes.to(torch.float64).sum()
 
     if dist.is_available() and dist.is_initialized():
@@ -454,13 +492,116 @@ def load_data_shard(file: Path) -> Tensor:
     return torch.from_numpy(tokens_np.astype(np.uint16, copy=False))
 
 
+def load_shard_score_entries(score_path: str) -> dict[str, dict[str, object]]:
+    path = Path(score_path)
+    if not path.is_file():
+        raise FileNotFoundError(f"Shard score file not found: {path}")
+    obj = json.loads(path.read_text(encoding="utf-8"))
+    entries = obj.get("shards")
+    if not isinstance(entries, list):
+        raise ValueError(f"Shard score file is missing 'shards': {path}")
+    by_name: dict[str, dict[str, object]] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError(f"Malformed shard score entry in {path}")
+        filename = entry.get("filename")
+        if not isinstance(filename, str) or not filename:
+            raise ValueError(f"Shard score entry is missing filename in {path}")
+        by_name[filename] = entry
+    return by_name
+
+
+def resolve_train_shard_files(
+    pattern: str,
+    shard_score_path: str,
+    shard_order: str,
+    shard_filter: str,
+    shard_filter_fraction: float,
+) -> tuple[list[Path], list[dict[str, object]]]:
+    files = [Path(p) for p in sorted(glob.glob(pattern))]
+    if not files:
+        raise FileNotFoundError(f"No files found for pattern: {pattern}")
+    if shard_order not in {"lexicographic", "easy_to_hard", "hard_to_easy"}:
+        raise ValueError(f"Unsupported TRAIN_SHARD_ORDER={shard_order}")
+    if shard_filter not in {"all", "quality_top_fraction"}:
+        raise ValueError(f"Unsupported TRAIN_SHARD_FILTER={shard_filter}")
+    if shard_filter == "all" and shard_order == "lexicographic" and not shard_score_path:
+        return files, []
+    if not shard_score_path:
+        raise ValueError(
+            "SHARD_SCORE_PATH is required when TRAIN_SHARD_ORDER or TRAIN_SHARD_FILTER uses scored shard metadata"
+        )
+    if not (0.0 < shard_filter_fraction <= 1.0):
+        raise ValueError(
+            f"TRAIN_SHARD_FILTER_FRACTION must be in (0, 1], got {shard_filter_fraction}"
+        )
+
+    score_entries = load_shard_score_entries(shard_score_path)
+    enriched: list[dict[str, object]] = []
+    missing = []
+    for file in files:
+        entry = score_entries.get(file.name)
+        if entry is None:
+            missing.append(file.name)
+            continue
+        enriched.append(
+            {
+                "path": file,
+                "filename": file.name,
+                "mean_unigram_surprisal_nats": float(entry["mean_unigram_surprisal_nats"]),
+                "repeat_rate": float(entry["repeat_rate"]),
+                "byte_token_rate": float(entry["byte_token_rate"]),
+                "avg_token_bytes": float(entry["avg_token_bytes"]),
+            }
+        )
+    if missing:
+        raise ValueError(
+            "Shard score file is missing entries for local shards: "
+            + ", ".join(sorted(missing))
+        )
+
+    quality_ranked = sorted(
+        enriched,
+        key=lambda entry: (
+            float(entry["byte_token_rate"]),
+            float(entry["repeat_rate"]),
+            -float(entry["avg_token_bytes"]),
+            str(entry["filename"]),
+        ),
+    )
+    if shard_filter == "quality_top_fraction":
+        keep_count = max(1, int(math.ceil(len(quality_ranked) * shard_filter_fraction)))
+        keep_names = {str(entry["filename"]) for entry in quality_ranked[:keep_count]}
+        enriched = [entry for entry in enriched if str(entry["filename"]) in keep_names]
+
+    if shard_order == "lexicographic":
+        ordered = sorted(enriched, key=lambda entry: str(entry["filename"]))
+    elif shard_order == "easy_to_hard":
+        ordered = sorted(
+            enriched,
+            key=lambda entry: (
+                float(entry["mean_unigram_surprisal_nats"]),
+                str(entry["filename"]),
+            ),
+        )
+    else:
+        ordered = sorted(
+            enriched,
+            key=lambda entry: (
+                -float(entry["mean_unigram_surprisal_nats"]),
+                str(entry["filename"]),
+            ),
+        )
+    return [Path(entry["path"]) for entry in ordered], ordered
+
+
 class TokenStream:
     # Reads shards sequentially and wraps around forever. The training loop therefore
     # has deterministic, simple streaming behavior with no sampling or workers.
-    def __init__(self, pattern: str):
-        self.files = [Path(p) for p in sorted(glob.glob(pattern))]
+    def __init__(self, files: list[Path]):
+        self.files = list(files)
         if not self.files:
-            raise FileNotFoundError(f"No files found for pattern: {pattern}")
+            raise FileNotFoundError("TokenStream requires at least one shard file")
         self.file_idx = 0
         self.tokens = load_data_shard(self.files[0])
         self.pos = 0
@@ -488,11 +629,11 @@ class TokenStream:
 class DistributedTokenLoader:
     # Each call consumes a contiguous chunk from the shared token stream, then slices out
     # one disjoint span per rank. The extra "+1" token lets us build (x, y) by shifting.
-    def __init__(self, pattern: str, rank: int, world_size: int, device: torch.device):
+    def __init__(self, files: list[Path], rank: int, world_size: int, device: torch.device):
         self.rank = rank
         self.world_size = world_size
         self.device = device
-        self.stream = TokenStream(pattern)
+        self.stream = TokenStream(files)
 
     def next_batch(self, global_tokens: int, seq_len: int, grad_accum_steps: int) -> tuple[Tensor, Tensor]:
         local_tokens = global_tokens // (self.world_size * grad_accum_steps)
@@ -654,12 +795,12 @@ class Block(nn.Module):
         self.mlp_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.resid_mix = nn.Parameter(torch.stack((torch.ones(dim), torch.zeros(dim))).float())
 
-    def forward(self, x: Tensor, x0: Tensor) -> Tensor:
+    def forward(self, x: Tensor, x0: Tensor, residual_scale: float = 1.0) -> Tensor:
         mix = self.resid_mix.to(dtype=x.dtype)
         x = mix[0][None, None, :] * x + mix[1][None, None, :] * x0
         attn_out = self.attn(self.attn_norm(x))
-        x = x + self.attn_scale.to(dtype=x.dtype)[None, None, :] * attn_out
-        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x))
+        x = x + residual_scale * self.attn_scale.to(dtype=x.dtype)[None, None, :] * attn_out
+        x = x + residual_scale * self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x))
         return x
 
 
@@ -678,31 +819,86 @@ class GPT(nn.Module):
         rope_base: float,
         qk_gain_init: float,
         mlp_hidden: int = 0,
+        shared_depth_mode: str = "off",
+        shared_depth_unique_blocks: int = 0,
+        shared_depth_total_passes: int = 0,
+        shared_depth_residual_scale_mode: str = "off",
     ):
         super().__init__()
         if logit_softcap <= 0.0:
             raise ValueError(f"logit_softcap must be positive, got {logit_softcap}")
+        if shared_depth_mode not in {"off", "cyclic"}:
+            raise ValueError(f"Unsupported SHARED_DEPTH_MODE={shared_depth_mode}")
+        if shared_depth_residual_scale_mode not in {"off", "inv_sqrt_reuse"}:
+            raise ValueError(
+                f"Unsupported SHARED_DEPTH_RESIDUAL_SCALE_MODE={shared_depth_residual_scale_mode}"
+            )
         self.tie_embeddings = tie_embeddings
         self.tied_embed_init_std = tied_embed_init_std
         self.logit_softcap = logit_softcap
+        self.shared_depth_mode = shared_depth_mode
         self.tok_emb = nn.Embedding(vocab_size, model_dim)
-        self.num_encoder_layers = num_layers // 2
-        self.num_decoder_layers = num_layers - self.num_encoder_layers
+        if self.shared_depth_mode == "off":
+            execution_passes = num_layers
+            self.blocks = nn.ModuleList(
+                [
+                    Block(
+                        model_dim,
+                        num_heads,
+                        num_kv_heads,
+                        mlp_mult,
+                        rope_base,
+                        qk_gain_init,
+                        mlp_hidden=mlp_hidden,
+                    )
+                    for _ in range(num_layers)
+                ]
+            )
+            self.shared_blocks = nn.ModuleList()
+            self.shared_depth_unique_blocks = 0
+        else:
+            if shared_depth_unique_blocks <= 0:
+                raise ValueError(
+                    "SHARED_DEPTH_UNIQUE_BLOCKS must be positive when SHARED_DEPTH_MODE is enabled"
+                )
+            if shared_depth_total_passes <= 0:
+                raise ValueError(
+                    "SHARED_DEPTH_TOTAL_PASSES must be positive when SHARED_DEPTH_MODE is enabled"
+                )
+            execution_passes = shared_depth_total_passes
+            self.blocks = nn.ModuleList()
+            self.shared_blocks = nn.ModuleList(
+                [
+                    Block(
+                        model_dim,
+                        num_heads,
+                        num_kv_heads,
+                        mlp_mult,
+                        rope_base,
+                        qk_gain_init,
+                        mlp_hidden=mlp_hidden,
+                    )
+                    for _ in range(shared_depth_unique_blocks)
+                ]
+            )
+            self.shared_depth_unique_blocks = shared_depth_unique_blocks
+        self.execution_passes = execution_passes
+        self.num_encoder_layers = execution_passes // 2
+        self.num_decoder_layers = execution_passes - self.num_encoder_layers
         self.num_skip_weights = min(self.num_encoder_layers, self.num_decoder_layers)
         self.skip_weights = nn.Parameter(torch.ones(self.num_skip_weights, model_dim, dtype=torch.float32))
-        self.blocks = nn.ModuleList(
-            [
-                Block(
-                    model_dim,
-                    num_heads,
-                    num_kv_heads,
-                    mlp_mult,
-                    rope_base,
-                    qk_gain_init,
-                    mlp_hidden=mlp_hidden,
-                )
-                for i in range(num_layers)
-            ]
+        self.shared_depth_total_passes = execution_passes if self.shared_depth_mode != "off" else 0
+        reuse_factor = (
+            self.shared_depth_total_passes / max(self.shared_depth_unique_blocks, 1)
+            if self.shared_depth_mode != "off"
+            else 1.0
+        )
+        self.shared_depth_reuse_factor = float(reuse_factor)
+        self.shared_depth_residual_scale_mode = shared_depth_residual_scale_mode
+        self.shared_depth_residual_scale = (
+            1.0 / math.sqrt(max(self.shared_depth_reuse_factor, 1.0))
+            if self.shared_depth_residual_scale_mode == "inv_sqrt_reuse"
+            else 1.0
         )
         self.final_norm = RMSNorm()
         self.lm_head = None if tie_embeddings else CastedLinear(model_dim, vocab_size, bias=False)
@@ -717,20 +913,33 @@ class GPT(nn.Module):
             if isinstance(module, nn.Linear) and getattr(module, "_zero_init", False):
                 nn.init.zeros_(module.weight)
 
-    def forward(self, input_ids: Tensor, target_ids: Tensor) -> Tensor:
+    def _active_block(self, pass_idx: int) -> Block:
+        if self.shared_depth_mode == "off":
+            return self.blocks[pass_idx]
+        return self.shared_blocks[pass_idx % self.shared_depth_unique_blocks]
+
+    def forward(
+        self,
+        input_ids: Tensor,
+        target_ids: Tensor,
+        base_bytes_lut: Tensor,
+        has_leading_space_lut: Tensor,
+        is_boundary_token_lut: Tensor,
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         x = self.tok_emb(input_ids)
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         skips: list[Tensor] = []
+        residual_scale = self.shared_depth_residual_scale
 
         # First half stores skips; second half reuses them in reverse order.
         for i in range(self.num_encoder_layers):
-            x = self.blocks[i](x, x0)
+            x = self._active_block(i)(x, x0, residual_scale=residual_scale)
             skips.append(x)
         for i in range(self.num_decoder_layers):
             if skips:
                 x = x + self.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skips.pop()
-            x = self.blocks[self.num_encoder_layers + i](x, x0)
+            x = self._active_block(self.num_encoder_layers + i)(x, x0, residual_scale=residual_scale)
 
         x = self.final_norm(x).reshape(-1, x.size(-1))
         targets = target_ids.reshape(-1)
@@ -741,7 +950,38 @@ class GPT(nn.Module):
                 raise RuntimeError("lm_head is required when tie_embeddings=False")
             logits_proj = self.lm_head(x)
         logits = self.logit_softcap * torch.tanh(logits_proj / self.logit_softcap)
-        return F.cross_entropy(logits.float(), targets, reduction="mean")
+        token_losses = F.cross_entropy(logits.float(), targets, reduction="none")
+        token_ce = token_losses.mean()
+        prev_ids = input_ids.reshape(-1)
+        token_bytes = compute_token_byte_values(
+            prev_ids,
+            targets,
+            base_bytes_lut,
+            has_leading_space_lut,
+            is_boundary_token_lut,
+        )
+        batch_target_bytes = token_bytes.to(dtype=token_losses.dtype).sum().clamp_min(1.0)
+        nats_per_byte = token_losses.sum() / batch_target_bytes
+        bytes_per_token = batch_target_bytes / max(targets.numel(), 1)
+        return token_ce, nats_per_byte, batch_target_bytes, bytes_per_token
+
+
+def collect_block_optimizer_params(model: GPT) -> tuple[list[Tensor], list[Tensor]]:
+    block_container = model.shared_blocks if model.shared_depth_mode != "off" else model.blocks
+    block_named_params = list(block_container.named_parameters())
+    matrix_params = [
+        p
+        for name, p in block_named_params
+        if p.ndim == 2 and not any(pattern in name for pattern in CONTROL_TENSOR_NAME_PATTERNS)
+    ]
+    scalar_params = [
+        p
+        for name, p in block_named_params
+        if p.ndim < 2 or any(pattern in name for pattern in CONTROL_TENSOR_NAME_PATTERNS)
+    ]
+    if model.skip_weights.numel() > 0:
+        scalar_params.append(model.skip_weights)
+    return matrix_params, scalar_params
 
 
 # -----------------------------
@@ -829,14 +1069,42 @@ def main() -> None:
         raise ValueError(
             f"VOCAB_SIZE={args.vocab_size} does not match tokenizer vocab_size={int(sp.vocab_size())}"
         )
+    if args.train_loss_mode not in {"token_ce", "byte_ce"}:
+        raise ValueError(f"Unsupported TRAIN_LOSS_MODE={args.train_loss_mode}")
     dataset_dir = Path(args.data_path).resolve()
     actual_train_files = len(list(dataset_dir.glob("fineweb_train_*.bin")))
     val_tokens = load_validation_tokens(args.val_files, args.train_seq_len)
     base_bytes_lut, has_leading_space_lut, is_boundary_token_lut = build_sentencepiece_luts(
         sp, args.vocab_size, device
     )
+    train_shard_files, resolved_shard_entries = resolve_train_shard_files(
+        args.train_files,
+        args.shard_score_path,
+        args.train_shard_order,
+        args.train_shard_filter,
+        args.train_shard_filter_fraction,
+    )
     log0(f"val_bpb:enabled tokenizer_kind=sentencepiece tokenizer_path={args.tokenizer_path}")
     log0(f"train_loader:dataset:{dataset_dir.name} train_shards:{actual_train_files}")
+    log0(
+        f"train_loss_mode:{args.train_loss_mode} normalization:"
+        f"{'sum_nll/sum_target_bytes' if args.train_loss_mode == 'byte_ce' else 'mean_token_ce'}"
+    )
+    log0(
+        f"train_shards:score_path:{args.shard_score_path or 'none'} "
+        f"order:{args.train_shard_order} filter:{args.train_shard_filter} "
+        f"filter_fraction:{args.train_shard_filter_fraction:.4f} included:{len(train_shard_files)}"
+    )
+    if resolved_shard_entries:
+        log0(
+            "train_shards:included_files:"
+            + ",".join(str(entry["filename"]) for entry in resolved_shard_entries)
+        )
+    else:
+        log0(
+            "train_shards:included_files:"
+            + ",".join(file.name for file in train_shard_files)
+        )
     log0(f"val_loader:shards pattern={args.val_files} tokens:{val_tokens.numel() - 1}")
 
     # -----------------------------
@@ -856,6 +1124,10 @@ def main() -> None:
         rope_base=args.rope_base,
         qk_gain_init=args.qk_gain_init,
         mlp_hidden=args.mlp_hidden,
+        shared_depth_mode=args.shared_depth_mode,
+        shared_depth_unique_blocks=args.shared_depth_unique_blocks,
+        shared_depth_total_passes=args.shared_depth_total_passes,
+        shared_depth_residual_scale_mode=args.shared_depth_residual_scale_mode,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -869,19 +1141,7 @@ def main() -> None:
     # - untied lm_head (Adam) uses HEAD_LR
     # - matrix params in transformer blocks use MATRIX_LR via Muon
     # - vectors/scalars use SCALAR_LR via Adam
-    block_named_params = list(base_model.blocks.named_parameters())
-    matrix_params = [
-        p
-        for name, p in block_named_params
-        if p.ndim == 2 and not any(pattern in name for pattern in CONTROL_TENSOR_NAME_PATTERNS)
-    ]
-    scalar_params = [
-        p
-        for name, p in block_named_params
-        if p.ndim < 2 or any(pattern in name for pattern in CONTROL_TENSOR_NAME_PATTERNS)
-    ]
-    if base_model.skip_weights.numel() > 0:
-        scalar_params.append(base_model.skip_weights)
+    matrix_params, scalar_params = collect_block_optimizer_params(base_model)
     token_lr = args.tied_embed_lr if args.tie_embeddings else args.embed_lr
     optimizer_tok = torch.optim.Adam(
         [{"params": [base_model.tok_emb.weight], "lr": token_lr, "base_lr": token_lr}],
@@ -919,6 +1179,14 @@ def main() -> None:
     log0("sdp_backends:cudnn=False flash=True mem_efficient=False math=False")
     log0(f"attention_mode:gqa num_heads:{args.num_heads} num_kv_heads:{args.num_kv_heads}")
     log0(
+        f"shared_depth:mode:{base_model.shared_depth_mode} "
+        f"unique_blocks:{base_model.shared_depth_unique_blocks} "
+        f"total_passes:{base_model.shared_depth_total_passes} "
+        f"reuse_factor:{base_model.shared_depth_reuse_factor:.4f} "
+        f"residual_scale_mode:{base_model.shared_depth_residual_scale_mode} "
+        f"residual_scale:{base_model.shared_depth_residual_scale:.6f}"
+    )
+    log0(
         f"tie_embeddings:{args.tie_embeddings} embed_lr:{token_lr} "
         f"head_lr:{args.head_lr if base_model.lm_head is not None else 0.0} "
         f"matrix_lr:{args.matrix_lr} scalar_lr:{args.scalar_lr}"
@@ -934,7 +1202,10 @@ def main() -> None:
     # DATA LOADER & MODEL WARMUP
     # -----------------------------
 
-    train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
+    train_loader = DistributedTokenLoader(train_shard_files, rank, world_size, device)
+
+    def select_training_loss(token_ce: Tensor, nats_per_byte: Tensor) -> Tensor:
+        return nats_per_byte if args.train_loss_mode == "byte_ce" else token_ce
 
     def zero_grad_all() -> None:
         for opt in optimizers:
@@ -966,7 +1237,14 @@ def main() -> None:
                     model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
                 x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                    warmup_loss = model(x, y)
+                    warmup_token_ce, warmup_nats_per_byte, _, _ = model(
+                        x,
+                        y,
+                        base_bytes_lut,
+                        has_leading_space_lut,
+                        is_boundary_token_lut,
+                    )
+                    warmup_loss = select_training_loss(warmup_token_ce, warmup_nats_per_byte)
                 (warmup_loss * grad_scale).backward()
             for opt in optimizers:
                 opt.step()
@@ -979,7 +1257,7 @@ def main() -> None:
         zero_grad_all()
         if distributed:
             model.require_backward_grad_sync = True
-        train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
+        train_loader = DistributedTokenLoader(train_shard_files, rank, world_size, device)
 
     # -----------------------------
     # MAIN TRAINING LOOP
@@ -1029,15 +1307,34 @@ def main() -> None:
         scale = lr_mul(step, elapsed_ms)
         zero_grad_all()
         train_loss = torch.zeros((), device=device)
+        train_loss_token_ce = torch.zeros((), device=device)
+        train_loss_nats_per_byte = torch.zeros((), device=device)
+        train_batch_target_bytes = torch.zeros((), device=device)
+        train_batch_bytes_per_token = torch.zeros((), device=device)
         for micro_step in range(grad_accum_steps):
             if distributed:
                 model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
             x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                loss = model(x, y)
+                token_ce, nats_per_byte, batch_target_bytes, bytes_per_token = model(
+                    x,
+                    y,
+                    base_bytes_lut,
+                    has_leading_space_lut,
+                    is_boundary_token_lut,
+                )
+                loss = select_training_loss(token_ce, nats_per_byte)
             train_loss += loss.detach()
+            train_loss_token_ce += token_ce.detach()
+            train_loss_nats_per_byte += nats_per_byte.detach()
+            train_batch_target_bytes += batch_target_bytes.detach()
+            train_batch_bytes_per_token += bytes_per_token.detach()
             (loss * grad_scale).backward()
         train_loss /= grad_accum_steps
+        train_loss_token_ce /= grad_accum_steps
+        train_loss_nats_per_byte /= grad_accum_steps
+        train_batch_target_bytes /= grad_accum_steps
+        train_batch_bytes_per_token /= grad_accum_steps
 
         frac = min(step / args.muon_momentum_warmup_steps, 1.0) if args.muon_momentum_warmup_steps > 0 else 1.0
         muon_momentum = (1 - frac) * args.muon_momentum_warmup_start + frac * args.muon_momentum
@@ -1063,7 +1360,11 @@ def main() -> None:
         if should_log_train:
             log0(
                 f"step:{step}/{args.iterations} train_loss:{train_loss.item():.4f} "
-                f"train_time:{approx_training_time_ms:.0f}ms step_avg:{approx_training_time_ms / step:.2f}ms"
+                f"train_time:{approx_training_time_ms:.0f}ms step_avg:{approx_training_time_ms / step:.2f}ms "
+                f"train_loss_token_ce:{train_loss_token_ce.item():.4f} "
+                f"train_loss_nats_per_byte:{train_loss_nats_per_byte.item():.4f} "
+                f"batch_target_bytes:{train_batch_target_bytes.item():.0f} "
+                f"batch_bytes_per_token:{train_batch_bytes_per_token.item():.4f}"
             )
 
         # Needed to sync whether we've reached the wallclock cap.
