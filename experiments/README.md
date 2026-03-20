@@ -30,9 +30,10 @@ bash scripts/experiments/run_1xh100_ablation.sh control
 ```
 
 That wrapper keeps the baseline command path, refreshes the ledger from the parsed
-summary JSON, and compares against the legacy compatibility file
-`experiments/baselines/local_1xh100_baseline_summary.json`, which stores the
-Runpod `1xH100` control anchor. New wrapper-created ledger rows default to
+summary JSON, and compares against
+`experiments/baselines/runpod_1xh100_control_anchor_summary.json` by default.
+The legacy compatibility file `experiments/baselines/local_1xh100_baseline_summary.json`
+is still supported, but it stores the older historical Runpod baseline summary rather than the adopted control-anchor metrics. New wrapper-created ledger rows default to
 hardware `Runpod 1xH100 pod`; override `EXPERIMENT_HARDWARE` only for true
 local-machine or other remote-host runs.
 

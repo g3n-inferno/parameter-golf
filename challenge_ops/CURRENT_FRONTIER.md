@@ -27,8 +27,8 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 | Anchor | Scope | Exact `val_bpb` | Notes |
 | --- | --- | ---: | --- |
 | `Naive Baseline` | `8xH100-leaderboard` | `1.22436570` | Public leaderboard baseline and record-track comparison anchor. |
-| `baseline_sp1024_h100_local_20260319` | `1xH100-surrogate` | `1.32321114` | Legacy-named baseline summary from a Runpod `1xH100` pod; keep the run ID for compatibility. |
-| `ablate_control_1xh100_1024` | `1xH100-surrogate` | `1.32157507` | Direct Runpod `1xH100` control rerun near the current surrogate anchor path. |
+| `Runpod 1xH100 control anchor` | `1xH100-surrogate` | `1.32157507` | Best observed Runpod single-GPU control-family anchor so far; represented by `ablate_control_1xh100_1024`, with legacy aliases `baseline_sp1024_h100_local_20260319` and `experiments/baselines/local_1xh100_baseline_summary.json` kept for compatibility. |
+| `Runpod 1xH100 control stabilization rerun` | `1xH100-surrogate` | `1.34849063` | Latest clean Runpod `1xH100` control rerun; materially worse than the adopted anchor and now the strongest workflow-variance warning signal. |
 
 ## Known Good Ideas
 
@@ -50,7 +50,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - `control_1xh100`
   - Standardized name: `runpod_1xh100_control_anchor`
   - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
-  - Evidence: Runpod-surrogate `ablate_control_1xh100_1024` reached `val_bpb=1.32157507`, but fresh single-pod Runpod retry `ablate_control_1xh100_20260320_runpod_retry2` landed at `1.33518228`.
+  - Evidence: the adopted `Runpod 1xH100 control anchor` is `ablate_control_1xh100_1024` at `val_bpb=1.32157507`, while clean Runpod reruns regressed to `1.33518228` (`ablate_control_1xh100_20260320_runpod_retry2`) and then `1.34849063` (`ablate_control_1xh100_20260320_runpod_stabilize`).
 - `lr_warmdown`
   - Standardized name: `longer_warmdown_schedule`
   - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
@@ -70,17 +70,17 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 ## Biggest Bottleneck
 
 - Confirmed: `1xH100-surrogate` reproducibility is now a bottleneck, because the strongest earlier `lr_warmdown` win did not reproduce on a real Runpod H100 SXM rerun.
-- Confirmed: the fresh single-pod remote control retry `ablate_control_1xh100_20260320_runpod_retry2` completed at `val_bpb=1.33518228`, which is `+0.01360721` worse than the current Runpod `1xH100` control anchor and `+0.00459506` worse than the earlier remote `lr_warmdown` run.
-- Inferred: the dominant issue is workflow variance on the Runpod `1xH100-surrogate` path, not an idea-specific `lr_warmdown` miss, and more paid ablations should pause until that control path is reliable.
+- Confirmed: the fresh single-pod remote control stabilization rerun `ablate_control_1xh100_20260320_runpod_stabilize` completed at `val_bpb=1.34849063`, which is `+0.02691556` worse than the adopted `Runpod 1xH100 control anchor`, `+0.01330835` worse than the prior clean Runpod control retry, and `+0.01790341` worse than the earlier remote `lr_warmdown` run.
+- Inferred: the dominant issue is workflow variance on the Runpod `1xH100-surrogate` control path rather than an idea-specific ablation miss, and more paid `1xH100-surrogate` ablations should stay paused until the control path has a grounded root-cause explanation or a repeatable recovery to the adopted anchor.
 
 ## Most Promising Next Experiment
 
-- Candidate: a narrow Runpod control-path stabilization pass for the fresh-boot remote control path before any more paid ablations.
+- Candidate: a low-cost root-cause audit of the Runpod control path before any more paid ablations.
 - Standardized name: `runpod_1xh100_control_anchor`
 - Why:
-  - Confirmed the clean remote control retry completed and still landed materially worse than the existing Runpod `1xH100` surrogate anchors.
-  - Confirmed the clean remote control retry was also worse than the earlier remote `lr_warmdown` run, so the workflow itself is now the strongest confounder.
-  - The highest-value next move is to make the exact control path reliable, not to spend more money on another ablation variant.
+  - Confirmed two clean remote control reruns both landed materially worse than the adopted `Runpod 1xH100 control anchor`, with the newest stabilization rerun regressing even further.
+  - Confirmed the newest control rerun was also worse than the earlier remote `lr_warmdown` run, so the workflow itself remains the strongest confounder.
+  - The highest-value next move is now root-cause isolation on the control path, not another paid ablation variant.
 - Guardrails before any expensive run:
   - keep dataset and tokenizer unchanged
   - keep result reporting apples to apples
@@ -88,6 +88,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - use one pod and one operator thread only; do not allow parallel agents to touch Runpod
   - verify the pod still has a real repo checkout after start or resume; if not, reclone before any dataset or training step
   - stop after a grounded infra failure rather than spending more paid ablation time on an unstable pod
+  - do not resume paid `1xH100-surrogate` ablations until a control rerun recovers near `ablate_control_1xh100_1024`
   - run submission and artifact checks before claiming record relevance
 
 ## Artifact Budget View
@@ -99,10 +100,11 @@ Artifact cap: `16000000` bytes
 | `Naive Baseline` | `8xH100-leaderboard` | `15863489` | `136511` |
 | `Long Context Seq2048 v2` | `8xH100-leaderboard` | `15867270` | `132730` |
 | `Sliding Window Eval` | `8xH100-leaderboard` | `15874829` | `125171` |
-| `local_1xh100_baseline_summary` (legacy alias for `runpod_1xh100_control_anchor`) | `1xH100-surrogate` | `14037860` | `1962140` |
+| `runpod_1xh100_control_anchor_summary` | `1xH100-surrogate` | `14004564` | `1995436` |
 | `ablate_lr_warmdown_1xh100_1024` | `1xH100-surrogate` | `12455545` | `3544455` |
 | `ablate_lr_warmdown_1xh100_20260320_runpod` | `1xH100-surrogate` | `12053652` | `3946348` |
 | `ablate_control_1xh100_20260320_runpod_retry2` | `1xH100-surrogate` | `13673535` | `2326465` |
+| `ablate_control_1xh100_20260320_runpod_stabilize` | `1xH100-surrogate` | `12940257` | `3059743` |
 
 ## Terminology Reminders
 
@@ -111,3 +113,4 @@ Artifact cap: `16000000` bytes
 - `already-tried` starts at the first meaningful ledger row or `/records` evidence.
 - `positive`, `negative`, and `inconclusive` are scope-specific. Do not collapse `1xH100-surrogate` and `8xH100-leaderboard` evidence into one verdict.
 - Treat challenge legality, reproducibility, and counted artifact size as first-class constraints on every frontier update.
+- Use `Runpod 1xH100 control anchor` for the adopted single-GPU remote control family. Keep legacy `_local_` filenames and run IDs only as compatibility aliases.
