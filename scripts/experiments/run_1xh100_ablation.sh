@@ -7,7 +7,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${REPO_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 EXPERIMENT_ID="${EXPERIMENT_ID:-${1:-}}"
 LOG_ROOT_BASE="${LOG_ROOT_BASE:-$REPO_DIR/logs/experiments/next_1xh100_workstream}"
-BASELINE_COMPARE_JSON="${BASELINE_COMPARE_JSON:-$REPO_DIR/experiments/baselines/local_1xh100_baseline_summary.json}"
+CANONICAL_BASELINE_COMPARE_JSON="${CANONICAL_BASELINE_COMPARE_JSON:-$REPO_DIR/experiments/baselines/runpod_1xh100_control_anchor_summary.json}"
+LEGACY_BASELINE_COMPARE_JSON="$REPO_DIR/experiments/baselines/local_1xh100_baseline_summary.json"
+BASELINE_COMPARE_JSON="${BASELINE_COMPARE_JSON:-}"
+if [[ -z "$BASELINE_COMPARE_JSON" ]]; then
+  if [[ -f "$CANONICAL_BASELINE_COMPARE_JSON" ]]; then
+    BASELINE_COMPARE_JSON="$CANONICAL_BASELINE_COMPARE_JSON"
+  else
+    BASELINE_COMPARE_JSON="$LEGACY_BASELINE_COMPARE_JSON"
+  fi
+fi
 BASELINE_COMPARE_LABEL="${BASELINE_COMPARE_LABEL:-runpod_1xh100_control_anchor}"
 SHARD_SCORE_ROOT="${SHARD_SCORE_ROOT:-$REPO_DIR/artifacts/shard_scores}"
 
@@ -30,9 +39,10 @@ Supported experiment_id values:
 This wrapper preserves the documented 1xH100 baseline path and only layers named
 env-var ablations on top. It also refreshes experiments/ledger.csv from the
 parsed summary JSON and compares each run against the Runpod 1xH100 control
-anchor. The legacy compatibility file
-experiments/baselines/local_1xh100_baseline_summary.json retains its old name,
-but it stores the Runpod `1xH100` anchor, not a local-machine run.
+anchor. The canonical comparison file is
+experiments/baselines/runpod_1xh100_control_anchor_summary.json, while the
+legacy compatibility file experiments/baselines/local_1xh100_baseline_summary.json
+remains supported as the older historical Runpod baseline summary.
 EOF
 }
 

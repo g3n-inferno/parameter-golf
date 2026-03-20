@@ -55,7 +55,7 @@ The wrapper:
 - uses the existing `scripts/experiments/run_baseline_1gpu.sh` path
 - writes timestamped logs under `logs/experiments/next_1xh100_workstream/`
 - refreshes `experiments/ledger.csv`
-- compares each run against the legacy compatibility file `experiments/baselines/local_1xh100_baseline_summary.json`, which stores the Runpod `1xH100` control anchor
+- compares each run against `experiments/baselines/runpod_1xh100_control_anchor_summary.json` by default, with the legacy compatibility file `experiments/baselines/local_1xh100_baseline_summary.json` retained only as the older historical Runpod baseline summary
 - checks the artifact cap from the parsed summary JSON
 
 ## Matrix Summary

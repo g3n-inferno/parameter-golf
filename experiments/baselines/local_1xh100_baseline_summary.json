@@ -1,7 +1,8 @@
 {
   "baseline_label": "runpod_1xh100_control_anchor",
+  "canonical_compare_path": "experiments/baselines/runpod_1xh100_control_anchor_summary.json",
   "code_bytes": 47686,
-  "compatibility_note": "Legacy filename retained for compatibility; this anchor was run on a Runpod 1xH100 pod, not a local machine.",
+  "compatibility_note": "Legacy filename retained for compatibility; this historical summary was run on a Runpod 1xH100 pod, not a local machine.",
   "final_eval_time_ms": 11158,
   "final_metric_source": "final_int8_zlib_roundtrip_exact",
   "final_val_bpb": 1.32321114,
