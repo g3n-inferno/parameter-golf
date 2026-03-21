@@ -41,10 +41,54 @@ def git_output(root: Path, *args: str) -> str:
     return proc.stdout.strip()
 
 
-def load_metadata(path: Path | None) -> dict[str, Any]:
-    if path is None:
+def normalize_metadata(raw: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(raw)
+    if "provenance" not in normalized and raw.get("schema_version") == 1 and "git" in raw and "code" in raw:
+        normalized["provenance"] = raw
+        normalized.setdefault("branch", (raw.get("git") or {}).get("branch"))
+        normalized.setdefault("commit_sha", (raw.get("git") or {}).get("commit_sha"))
+        normalized.setdefault("code_path", (raw.get("code") or {}).get("path"))
+        normalized.setdefault("dataset_variant", raw.get("dataset_variant"))
+        normalized.setdefault("tokenizer_variant", raw.get("tokenizer_variant"))
+        normalized.setdefault("hardware", raw.get("hardware"))
+        normalized.setdefault("wallclock_target", raw.get("wallclock_target"))
+        normalized.setdefault("core_hparams", raw.get("core_hparams"))
+        normalized.setdefault("track_intent", raw.get("track_intent"))
+        normalized.setdefault("exact_command", raw.get("exact_command"))
+    return normalized
+
+
+def auto_metadata_path(log_path: Path) -> Path | None:
+    candidate = log_path.parent / "provenance.json"
+    return candidate if candidate.is_file() else None
+
+
+def load_metadata(path: Path | None, log_path: Path) -> dict[str, Any]:
+    metadata_path = path or auto_metadata_path(log_path)
+    if metadata_path is None:
         return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    return normalize_metadata(json.loads(metadata_path.read_text(encoding="utf-8")))
+
+
+def build_compare_target(other: dict[str, Any], path: Path, label: str) -> dict[str, Any]:
+    return {
+        "path": str(path.resolve()),
+        "label": label,
+        "baseline_label": other.get("baseline_label"),
+        "source_run_id": other.get("source_run_id"),
+        "source_commit_sha": other.get("source_commit_sha"),
+        "source_commit_sha_inferred": other.get("source_commit_sha_inferred"),
+        "log_path": other.get("log_path"),
+        "final_val_loss": other.get("final_val_loss"),
+        "final_val_bpb": other.get("final_val_bpb"),
+        "total_submission_size_int8_zlib_bytes": other.get("total_submission_size_int8_zlib_bytes"),
+        "anchor_status": other.get("anchor_status"),
+        "provenance_status": other.get("provenance_status"),
+        "raw_log_present": other.get("raw_log_present"),
+        "raw_result_packet_present": other.get("raw_result_packet_present"),
+        "requires_rebuild_before_ablation": other.get("requires_rebuild_before_ablation"),
+        "compatibility_note": other.get("compatibility_note"),
+    }
 
 
 def choose(parsed: dict[str, Any], int8_key: str, raw_key: str) -> tuple[Any, str | None]:
@@ -124,6 +168,7 @@ def build_result(
     parsed: dict[str, Any],
     metadata: dict[str, Any],
     comparison: dict[str, Any] | None,
+    compare_target: dict[str, Any] | None,
 ) -> dict[str, Any]:
     root = repo_root()
     run_id = args.run_id or metadata_value(metadata, "run_id", args.log_path.stem)
@@ -188,6 +233,8 @@ def build_result(
                 "delta_eval_time_ms": None,
             },
         ),
+        "compare_target": compare_target or metadata.get("compare_target", {}),
+        "provenance": metadata.get("provenance", {}),
         "confirmed_findings": metadata.get("confirmed_findings", []) + list(args.confirmed_finding),
         "inferred_conclusions": metadata.get("inferred_conclusions", []) + list(args.inferred_conclusion),
     }
@@ -207,6 +254,8 @@ def format_number(value: Any) -> str:
 
 def render_markdown(result: dict[str, Any]) -> str:
     comparison = result.get("comparison") or {}
+    compare_target = result.get("compare_target") or {}
+    provenance = result.get("provenance") or {}
     confirmed = result.get("confirmed_findings") or []
     inferred = result.get("inferred_conclusions") or []
 
@@ -269,6 +318,25 @@ def render_markdown(result: dict[str, Any]) -> str:
         f"- `comparison.delta_stop_step`: {format_number(comparison.get('delta_stop_step'))}",
         f"- `comparison.delta_eval_time_ms`: {format_number(comparison.get('delta_eval_time_ms'))}",
         "",
+        "## Compare Target Provenance",
+        "",
+        f"- `compare_target.path`: {format_number(compare_target.get('path'))}",
+        f"- `compare_target.label`: {format_number(compare_target.get('label'))}",
+        f"- `compare_target.source_run_id`: {format_number(compare_target.get('source_run_id'))}",
+        f"- `compare_target.source_commit_sha`: {format_number(compare_target.get('source_commit_sha') or compare_target.get('source_commit_sha_inferred'))}",
+        f"- `compare_target.anchor_status`: {format_number(compare_target.get('anchor_status'))}",
+        f"- `compare_target.provenance_status`: {format_number(compare_target.get('provenance_status'))}",
+        f"- `compare_target.raw_log_present`: {format_number(compare_target.get('raw_log_present'))}",
+        f"- `compare_target.raw_result_packet_present`: {format_number(compare_target.get('raw_result_packet_present'))}",
+        f"- `compare_target.requires_rebuild_before_ablation`: {format_number(compare_target.get('requires_rebuild_before_ablation'))}",
+        "",
+        "## Run Provenance",
+        "",
+        f"- `provenance.git.commit_sha`: {format_number(((provenance.get('git') or {}).get('commit_sha')))}",
+        f"- `provenance.code.sha256`: {format_number(((provenance.get('code') or {}).get('sha256')))}",
+        f"- `provenance.dataset.manifest_sha256`: {format_number(((provenance.get('dataset') or {}).get('manifest_sha256')))}",
+        f"- `provenance.tokenizer.sha256`: {format_number(((provenance.get('tokenizer') or {}).get('sha256')))}",
+        "",
         "## Confirmed Findings",
         "",
     ]
@@ -305,16 +373,18 @@ def main() -> int:
     args = build_parser().parse_args()
     root = repo_root()
     parser_module = load_parse_module(root)
-    metadata = load_metadata(args.metadata_json)
+    metadata = load_metadata(args.metadata_json, args.log_path)
     parsed = parser_module.parse_log(args.log_path)
 
     comparison = None
+    compare_target = None
     if args.compare_json is not None:
         other = parser_module.load_parsed_json(args.compare_json)
         compare_label = args.compare_label or args.compare_json.stem
         comparison = parser_module.build_comparison(parsed, other, compare_label)
+        compare_target = build_compare_target(other, args.compare_json, compare_label)
 
-    result = build_result(args, parsed, metadata, comparison)
+    result = build_result(args, parsed, metadata, comparison, compare_target)
     markdown = render_markdown(result)
 
     json_out = resolved_output(args.json_out, args.log_path.with_suffix(args.log_path.suffix + ".result.json"))
