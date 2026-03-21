@@ -1,0 +1,61 @@
+[identity]
+name = "parameter-golf-autonomy"
+prompt_path = "scripts/autonomy/program.md"
+skill_path = ".codex/skills/parameter-golf-autonomy/SKILL.md"
+
+[defaults]
+owner = "Codex"
+scope = "1xH100-surrogate"
+intent = "non-record"
+dataset_variant = "fineweb10B_sp1024"
+tokenizer_variant = "fineweb_1024_bpe.model"
+code_path = "train_gpt.py"
+hardware = "Runpod 1xH100 pod"
+wallclock_target = "600s"
+compare_json = "experiments/baselines/runpod_1xh100_control_anchor_summary.json"
+artifact_cap_bytes = 16000000
+
+[permissions]
+allow_remote_runpod = true
+allow_paid_runpod = true
+allow_8xh100 = false
+allow_submission_packaging = false
+allow_submission_recommendation = false
+allow_dataset_or_tokenizer_change = false
+max_concurrent_pods = 1
+
+[guards]
+require_brief_before_meaningful_run = true
+require_visible_dry_run_plan_before_paid_run = true
+require_remote_approval_token = true
+require_result_packet_after_meaningful_run = true
+require_ledger_update_after_meaningful_run = true
+require_runpod_usage_tracking = true
+require_tried_ideas_check = true
+require_val_bpb_proof_for_dataset_or_tokenizer_change = true
+require_preflight_before_submission = true
+enforce_records_folder_only_submission = true
+prohibit_seed_fishing = true
+prohibit_blind_sweeps = true
+
+[paths]
+current_frontier = "challenge_ops/CURRENT_FRONTIER.md"
+tried_ideas = "challenge_ops/TRIED_IDEAS_INDEX.md"
+ledger = "experiments/ledger.csv"
+briefs_dir = "challenge_ops/briefs"
+results_dir = "challenge_ops/results"
+shortlists_dir = "challenge_ops/shortlists"
+approvals_dir = "challenge_ops/approvals"
+
+[promotion]
+require_shortlist_before_8xh100 = true
+min_shortlist_candidates = 2
+max_shortlist_candidates = 4
+require_user_policy_change_before_8xh100 = true
+
+[runpod]
+preferred_template_1xh100 = "y5cejece4j"
+usage_scope = "challenge"
+funding_note = "OpenAI Runpod credit allocation ($25, blended balance assumption)"
+stop_extra_fallback_pods = true
+reuse_existing_pod_first = true
