@@ -7,8 +7,10 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import socket
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -51,6 +53,33 @@ def command_output(*args: str) -> str:
     except Exception:
         return ""
     return proc.stdout.strip()
+
+
+def python_package_probe() -> dict[str, Any]:
+    probe: dict[str, Any] = {
+        "python_executable": sys.executable,
+        "python_version": sys.version.split()[0],
+        "platform": platform.platform(),
+    }
+
+    try:
+        import sentencepiece as spm  # type: ignore
+
+        probe["sentencepiece_version"] = getattr(spm, "__version__", "")
+    except Exception as exc:
+        probe["sentencepiece_probe_error"] = str(exc)
+
+    try:
+        import torch  # type: ignore
+
+        probe["torch_version"] = torch.__version__
+        probe["torch_cuda_version"] = getattr(torch.version, "cuda", None)
+        probe["torch_cuda_available"] = bool(torch.cuda.is_available())
+        probe["torch_device_count"] = int(torch.cuda.device_count()) if torch.cuda.is_available() else 0
+    except Exception as exc:
+        probe["torch_probe_error"] = str(exc)
+
+    return probe
 
 
 def dataset_entries(data_path: Path, pattern: str) -> list[dict[str, Any]]:
@@ -185,7 +214,33 @@ def main() -> int:
     if args.compare_json is not None:
         compare_json = load_compare_json(args.compare_json.resolve(), args.compare_label)
 
+    package_probe = python_package_probe()
     git_status = git_output(repo_dir, "status", "--short")
+    gpu_names = [
+        line
+        for line in command_output("nvidia-smi", "--query-gpu=name", "--format=csv,noheader").splitlines()
+        if line
+    ]
+    gpu_query_rows = [
+        line
+        for line in command_output(
+            "nvidia-smi",
+            "--query-gpu=name,driver_version,memory.total,pci.bus_id",
+            "--format=csv,noheader",
+        ).splitlines()
+        if line
+    ]
+    fingerprint_payload = {
+        "gpu_names": gpu_names,
+        "gpu_query_rows": gpu_query_rows,
+        "vcpu_count": os.cpu_count(),
+        "python_version": package_probe.get("python_version"),
+        "torch_version": package_probe.get("torch_version"),
+        "torch_cuda_version": package_probe.get("torch_cuda_version"),
+        "sentencepiece_version": package_probe.get("sentencepiece_version"),
+        "platform": package_probe.get("platform"),
+        "uname": command_output("uname", "-a"),
+    }
     manifest = {
         "schema_version": 1,
         "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -232,9 +287,15 @@ def main() -> int:
         "compare_json": compare_json,
         "host": {
             "hostname": socket.gethostname(),
-            "gpu_names": [line for line in command_output("nvidia-smi", "--query-gpu=name", "--format=csv,noheader").splitlines() if line],
-            "gpu_count": len([line for line in command_output("nvidia-smi", "--query-gpu=name", "--format=csv,noheader").splitlines() if line]),
+            "gpu_names": gpu_names,
+            "gpu_count": len(gpu_names),
             "vcpu_count": os.cpu_count(),
+            "gpu_query_rows": gpu_query_rows,
+            "nvidia_smi_l": [line for line in command_output("nvidia-smi", "-L").splitlines() if line],
+            "df_repo_dir": command_output("df", "-Pk", str(repo_dir)),
+            "uname": fingerprint_payload["uname"],
+            "python": package_probe,
+            "fingerprint_sha256": sha256_bytes(json.dumps(fingerprint_payload, sort_keys=True).encode("utf-8")),
         },
     }
 

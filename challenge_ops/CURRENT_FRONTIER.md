@@ -1,6 +1,6 @@
 # Current Frontier
 
-Last updated: `2026-03-20`
+Last updated: `2026-03-21`
 
 This file is the Project GPT and Codex quick-read memory for the current repo frontier.
 Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS_INDEX.md`.
@@ -30,7 +30,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 | `Naive Baseline` | `8xH100-leaderboard` | `1.22436570` | Public leaderboard baseline and record-track comparison anchor. |
 | `Runpod 1xH100 provisional legacy control anchor` | `1xH100-surrogate` | `1.32157507` | Best historical single-GPU control-family metric so far, represented by `ablate_control_1xh100_1024`, but only preserved via ledger-mirrored compare JSON and inferred git lineage; treat it as a provisional legacy anchor until a new frozen anchor is rebuilt. |
 | `Runpod 1xH100 rebuilt-control best rerun` | `1xH100-surrogate` | `1.32776835` | Best provenance-hardened same-pod control rerun so far, represented by `ablate_control_1xh100_20260321_runpod_frozen_anchor_b` on reused pod `474jlphqpo5n8x` with pinned base commit `c59338a...` and recorded wrapper/data/tokenizer/compare hashes. |
-| `Runpod 1xH100 stable-profile control rerun` | `1xH100-surrogate` | `1.35280815` | Latest clean Runpod `1xH100` control rerun on a profile-matching US `26`-vCPU pod; still materially worse than the provisional legacy anchor and now the strongest non-reproducibility warning signal. |
+| `Runpod 1xH100 fresh official-template control rerun` | `1xH100-surrogate` | `1.35283929` | Fresh official-template `US-MO-1` H100 rerun on new pod `vhrzxwizzi276z`; after bounded checkout recovery from the stub template, it matched the earlier clean stable-profile control regime within `0.00003114` `val_bpb`. |
 
 ## Known Good Ideas
 
@@ -64,7 +64,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - `control_1xh100`
   - Standardized name: `runpod_1xh100_control_anchor`
   - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
-  - Evidence: the provisional legacy `Runpod 1xH100 control anchor` is `ablate_control_1xh100_1024` at `val_bpb=1.32157507`, but its raw log and result packet are not preserved locally and its compare JSON is mirrored from the ledger with inferred commit lineage; provenance-hardened same-pod rebuilds on reused stable-profile pod `474jlphqpo5n8x` then landed at `1.32963305`, `1.32776835`, and `1.33473550` with identical recorded code/dataset/tokenizer/compare hashes, and a fresh official-template baseline reproduction on exact integrated `main` commit `ea0df59...` still landed much worse at `1.34888151`, so the control family is better constrained but still not stable enough to resume ablations.
+  - Evidence: the provisional legacy `Runpod 1xH100 control anchor` is `ablate_control_1xh100_1024` at `val_bpb=1.32157507`, but its raw log and result packet are not preserved locally and its compare JSON is mirrored from the ledger with inferred commit lineage; provenance-hardened same-pod rebuilds on reused stable-profile pod `474jlphqpo5n8x` then landed at `1.32963305`, `1.32776835`, and `1.33473550` with identical recorded code/dataset/tokenizer/compare hashes, while two clean fresh official-template US `26`-vCPU runs on new pods landed at `1.34888151` and `1.35283929`, reinforcing a stable fresh-pod regime near `1.3528` rather than a recovery toward the rebuilt same-pod best.
 - `lr_warmdown`
   - Standardized name: `longer_warmdown_schedule`
   - Verdict: `variant / already-tried / inconclusive / non-record @ 1xH100-surrogate`
@@ -86,21 +86,24 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - Confirmed: `1xH100-surrogate` reproducibility is now a bottleneck, because the strongest earlier `lr_warmdown` win did not reproduce on a real Runpod H100 SXM rerun.
 - Confirmed: the stable-profile rerun `ablate_control_1xh100_20260320_runpod_stable` completed at `val_bpb=1.35280815`, which is `+0.03123308` worse than the provisional legacy `Runpod 1xH100 control anchor`, `+0.00431752` worse than the earlier non-US low-vCPU rerun, and `+0.02222093` worse than the earlier remote `lr_warmdown` run.
 - Confirmed: the stable-profile rerun used a fresh `US-MO-1` H100 pod with `26` vCPUs and passed the declared `challenge_ops/runpod_1xh100_control_profile.json` policy, so the earlier control miss cannot be explained away by the `EUR-NO-2` / `8`-vCPU host alone.
+- Confirmed: the fresh official-template control rerun `control_path_diagnosis_20260321_fresh_template_runpod` on new pod `vhrzxwizzi276z` also passed the declared `US-MO-1` `26`-vCPU profile, recovered the stub template checkout to exact local `main` commit `82189d277df1191bdc7211d0783d6b7718548cd4` in `3.704s`, and finished at `val_bpb=1.35283929`, `bytes_total=12808876`, and `stop_step=1107`.
+- Confirmed: the fresh official-template control rerun differs from `ablate_control_1xh100_20260320_runpod_stable` by only `+0.00003114` `val_bpb`, which is strong evidence that the clean fresh-pod control path is reproducibly in the `~1.3528` regime.
+- Confirmed: the earlier fresh official-template run `baseline_sp1024_1xh100_20260320_integrated_main` at `val_bpb=1.34888151` is not perfectly apples to apples with the later control reruns, because its exact training command did not set `VAL_LOSS_EVERY=200`, while the reused same-pod rebuild family and `control_path_diagnosis_20260321_fresh_template_runpod` all did.
 - Confirmed: the provisional legacy anchor `ablate_control_1xh100_1024` is not recoverable as a fully frozen anchor today because its raw log/result packet are absent and its canonical compare JSON is mirrored from `experiments/ledger.csv` with only inferred commit/export lineage.
 - Confirmed: the byte drift is not just code drift. The export family changed from `code_bytes=48294` on the provisional legacy anchor to `61795` on later reruns, but the larger same-family change is in `model_int8_zlib_bytes` (`13611740` -> `12878462` -> `12435489`) as the worse reruns stop earlier and compress much smaller.
 - Confirmed: three provenance-hardened same-pod control rebuilds on reused pod `474jlphqpo5n8x` shared pinned base commit `c59338a...`, `train_gpt.py` hash `15846ddc...`, dataset manifest hash `c0ebc88d...`, tokenizer hash `4f5e8adb...`, and compare JSON hash `aa400747...`, yet still spread across `val_bpb=1.32776835` to `1.33473550`.
 - Confirmed: a fresh official-template H100 baseline reproduction on pod `lgprpetuw79pk9` using the exact local integrated `main` commit `ea0df59713d6288526ab88ee1f316692da188356` via a transferred git bundle completed under the default `600s` cap at `val_bpb=1.34888151`, `bytes_total=12841006`, and `stop_step=1136`.
 - Confirmed: upstream moved the leaderboard frontier substantially through new record folders, but those additions are mostly new record recipes and README updates, not a proven fix to the fork-local `1xH100-surrogate` instability path.
-- Inferred: the dominant issue is deeper non-reproducibility in the Runpod `1xH100-surrogate` control path rather than a simple bad-host mismatch, and syncing to current upstream is not, by itself, evidence that the surrogate instability is solved.
+- Inferred: after accounting for the `VAL_LOSS_EVERY` mismatch between the two fresh official-template runs, the strongest remaining concrete confounder in stored evidence is warm reused-container state on pod `474jlphqpo5n8x`, because the reused rebuild family and the fresh-template rerun otherwise share the same recorded code hash, dataset manifest hash, tokenizer hash, wrapper hash, GPU class, and pod control profile.
 
 ## Most Promising Next Experiment
 
-- Candidate: no paid surrogate ablation yet; if more GPU time is spent, use it only for another control-path diagnosis, not a model change.
+- Candidate: no paid surrogate model ablation yet; if more GPU time is spent, use it only for a single tightly instrumented warm-state control test, not a model change.
 - Standardized name: `runpod_1xh100_control_anchor`
 - Why:
   - Confirmed the rebuilt control family is now provenance-correct but still not stable enough: same pod, same overlay hashes, and same dataset/tokenizer hashes still produced `1.32963305`, `1.32776835`, and `1.33473550`.
-  - Confirmed the best rebuilt rerun missed the provisional-legacy `+0.005` recovery gate by `+0.00119328`, and the third rerun widened again instead of tightening.
-  - The highest-value next move is therefore still control-path diagnosis, not a paid model ablation, even after integrating the newer upstream record history.
+  - Confirmed the only concrete apples-to-apples mismatch between the two fresh official-template runs is validation cadence: `baseline_sp1024_1xh100_20260320_integrated_main` omitted `VAL_LOSS_EVERY=200`, while `control_path_diagnosis_20260321_fresh_template_runpod` and the reused rebuild family included it.
+  - The highest-value next move is therefore not another generic fresh control rerun. If GPU time is spent again, it should be on one paired same-pod warm-state test that runs the exact `VAL_LOSS_EVERY=200` control command twice back to back on a fresh official-template pod, to see whether the second run moves from the `~1.3528` fresh-pod regime toward the `1.3278-1.3347` reused-pod regime.
 - Guardrails before any expensive run:
   - keep dataset and tokenizer unchanged
   - keep result reporting apples to apples
@@ -109,7 +112,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - verify the pod still has a real repo checkout after start or resume; if not, reclone before any dataset or training step
   - stop after a grounded infra failure rather than spending more paid ablation time on an unstable pod
   - do not resume paid `1xH100-surrogate` ablations until a control family with the new provenance surface repeatedly recovers near the provisional legacy `ablate_control_1xh100_1024`
-  - prefer restarting a prior matching pod first, but treat repeated host-placement failures as an ops fact rather than a reason to lower the control-profile bar
+  - treat further fresh official-template reruns without new instrumentation as low-value confirmation, not frontier progress
   - run submission and artifact checks before claiming record relevance
 
 ## Artifact Budget View
@@ -133,6 +136,7 @@ Artifact cap: `16000000` bytes
 | `ablate_control_1xh100_20260320_runpod_retry2` | `1xH100-surrogate` | `13673535` | `2326465` |
 | `ablate_control_1xh100_20260320_runpod_stabilize` | `1xH100-surrogate` | `12940257` | `3059743` |
 | `ablate_control_1xh100_20260320_runpod_stable` | `1xH100-surrogate` | `12497284` | `3502716` |
+| `control_path_diagnosis_20260321_fresh_template_runpod` | `1xH100-surrogate` | `12808876` | `3191124` |
 
 ## Terminology Reminders
 

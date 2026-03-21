@@ -1,0 +1,21 @@
+{
+  "code_bytes": 61795,
+  "final_eval_time_ms": 11176,
+  "final_metric_source": "final_int8_zlib_roundtrip_exact",
+  "final_val_bpb": 1.35283929,
+  "final_val_loss": 2.28421247,
+  "iterations": 20000,
+  "last_logged_step_avg_ms": 542.21,
+  "last_logged_train_time_ms": 600221,
+  "last_step": 1107,
+  "log_path": "/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_203550_control_path_diagnosis_20260321_fresh_template_runpod/run.log",
+  "model_bytes": 67225047,
+  "model_int8_zlib_bytes": 12747081,
+  "peak_memory_allocated_mib": 10239,
+  "peak_memory_reserved_mib": 10748,
+  "stop_reason": "wallclock_cap",
+  "stop_step": 1107,
+  "stop_train_time_ms": 600221,
+  "total_submission_size_bytes": 67286842,
+  "total_submission_size_int8_zlib_bytes": 12808876
+}
