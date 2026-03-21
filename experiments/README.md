@@ -37,6 +37,18 @@ is still supported, but it stores the older historical Runpod baseline summary r
 hardware `Runpod 1xH100 pod`; override `EXPERIMENT_HARDWARE` only for true
 local-machine or other remote-host runs.
 
+Each wrapper-created run directory now also records `provenance.json`, which captures:
+
+- pinned git branch and commit
+- exact wrapper and `train_gpt.py` hashes
+- compare-JSON path and lineage metadata
+- dataset shard-count plus manifest hash
+- tokenizer hash
+
+If the compare JSON is marked `requires_rebuild_before_ablation=true`, the wrapper
+permits `control` rebuilds but refuses non-control surrogate ablations until a new
+frozen control anchor exists.
+
 Before a paid `1xH100-surrogate` Runpod run, validate the pod against the
 declared stable control profile:
 

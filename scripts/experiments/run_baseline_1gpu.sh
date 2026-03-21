@@ -70,6 +70,7 @@ mkdir -p "$RUN_DIR"
 LOG_FILE="$RUN_DIR/run.log"
 SUMMARY_FILE="$RUN_DIR/summary.txt"
 JSON_FILE="$RUN_DIR/summary.json"
+PROVENANCE_FILE="$RUN_DIR/provenance.json"
 
 write_status_summary() {
   local status="$1"
@@ -109,6 +110,8 @@ echo "run_dir=$RUN_DIR"
 echo "target_gpu_label=$TARGET_GPU_LABEL"
 echo "data_path=$DATA_PATH"
 echo "tokenizer_path=$TOKENIZER_PATH"
+echo "git_branch=$(git -C "$REPO_DIR" branch --show-current)"
+echo "git_commit_sha=$(git -C "$REPO_DIR" rev-parse HEAD)"
 
 if [[ ! -d "$REPO_DIR/.git" ]]; then
   echo "expected git repo at $REPO_DIR" >&2
@@ -198,8 +201,44 @@ if [[ -n "$MAX_WALLCLOCK_SECONDS" ]]; then
   env_args+=("MAX_WALLCLOCK_SECONDS=$MAX_WALLCLOCK_SECONDS")
 fi
 
+printf -v env_args_joined '%q ' "${env_args[@]}"
+EXACT_TRAIN_COMMAND="env ${env_args_joined}torchrun --standalone --nproc_per_node=1 train_gpt.py"
+
+LAST_CONTEXT="recording provenance manifest"
+provenance_args=(
+  "--output" "$PROVENANCE_FILE"
+  "--repo-dir" "$REPO_DIR"
+  "--run-dir" "$RUN_DIR"
+  "--log-file" "$LOG_FILE"
+  "--run-id" "$RUN_ID"
+  "--code-path" "$REPO_DIR/train_gpt.py"
+  "--wrapper-path" "$REPO_DIR/scripts/experiments/run_baseline_1gpu.sh"
+  "--exact-command" "$EXACT_TRAIN_COMMAND"
+  "--target-gpu-label" "$TARGET_GPU_LABEL"
+  "--hardware" "${EXPERIMENT_HARDWARE:-}"
+  "--dataset-variant" "${DATASET_VARIANT:-}"
+  "--dataset-path" "$DATA_PATH"
+  "--expected-train-shards" "$EXPECTED_TRAIN_SHARDS"
+  "--tokenizer-variant" "${TOKENIZER_VARIANT:-}"
+  "--tokenizer-path" "$TOKENIZER_PATH"
+  "--core-hparams" "${CORE_HPARAMS:-}"
+  "--track-intent" "${TRACK_INTENT:-}"
+  "--wallclock-target" "${WALLCLOCK_TARGET:-}"
+)
+if [[ -n "${WORKFLOW_WRAPPER_PATH:-}" ]]; then
+  provenance_args+=("--wrapper-path" "$WORKFLOW_WRAPPER_PATH")
+fi
+if [[ -n "${COMPARE_JSON_PATH:-}" && -f "${COMPARE_JSON_PATH:-}" ]]; then
+  provenance_args+=("--compare-json" "$COMPARE_JSON_PATH")
+  if [[ -n "${COMPARE_JSON_LABEL:-}" ]]; then
+    provenance_args+=("--compare-label" "$COMPARE_JSON_LABEL")
+  fi
+fi
+"$PYTHON_BIN" "$REPO_DIR/scripts/experiments/write_run_provenance.py" "${provenance_args[@]}"
+echo "provenance_json=$PROVENANCE_FILE"
+
 echo "starting baseline training command"
-echo "env overrides: ${env_args[*]}"
+echo "exact_train_command=$EXACT_TRAIN_COMMAND"
 LAST_CONTEXT="running baseline training"
 (
   cd "$REPO_DIR"

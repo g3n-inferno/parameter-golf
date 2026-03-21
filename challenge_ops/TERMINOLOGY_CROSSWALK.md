@@ -34,6 +34,7 @@ Use this file to normalize informal phrasing into the standard terms used in `ch
 | `leaderboard relevant`, `record-track`, `SOTA candidate` | `track-candidate` | Plausible for `records/track_10min_16mb`, subject to compliance and rerun checks. | `Long Context Seq2048` |
 | `cheap surrogate`, `1xH100 check`, `single-GPU proxy` | `1xH100-surrogate` | Scope only: single-GPU evidence used for iteration, not direct leaderboard proof. | `baseline_sp1024_h100_local_20260319` |
 | `Runpod control anchor`, `single-GPU control anchor`, `current control anchor` | `Runpod 1xH100 control anchor` | Human-facing name for the adopted remote single-GPU control family; keep scope separate as `1xH100-surrogate`. | `ablate_control_1xh100_1024` |
+| `legacy control anchor`, `provisional anchor`, `unfrozen control anchor` | `Runpod 1xH100 provisional legacy control anchor` | Historical control metric that remains useful for context but lacks a recoverable raw packet/log or frozen provenance surface. | `experiments/baselines/runpod_1xh100_control_anchor_summary.json` |
 | `local machine`, `desktop GPU`, `workstation GPU` | `local machine` | Hardware locality only; do not use it as a surrogate-scope label. | Use only when the GPU is physically local. |
 | `Runpod`, `Runpod pod`, `remote Runpod H100` | `Runpod 1xH100 pod` | Explicit remote hardware wording for the current single-GPU control path. | `ablate_control_1xh100_20260320_runpod_retry2` |
 | `local_1xh100_baseline`, `baseline_sp1024_h100_local_20260319`, `local_control_baseline_rerun` | legacy alias for `Runpod 1xH100 control anchor` | Keep these names only for compatibility with existing files and run IDs; human-facing summaries should use `Runpod 1xH100 control anchor`. | `experiments/baselines/local_1xh100_baseline_summary.json` |
@@ -49,5 +50,6 @@ Use this file to normalize informal phrasing into the standard terms used in `ch
 - Do not use bare `local` to mean `1xH100-surrogate`. Keep hardware locality and scope separate.
 - When the hardware is Runpod, say `Runpod 1xH100 pod` explicitly in briefs, prompts, result packets, and frontier notes.
 - Use `Runpod 1xH100 control anchor` for the adopted control-family anchor and reserve `_local_` wording for compatibility aliases or true local-machine runs.
+- If the raw log, result packet, or recorded commit for an anchor cannot be recovered, demote it in memory to `Runpod 1xH100 provisional legacy control anchor` and rebuild a new frozen anchor before more surrogate ablations.
 - Keep `scope` attached to verdicts. A result can be positive on `1xH100-surrogate` and still be unproven on `8xH100-leaderboard`.
 - `track-candidate` is not the same as `submission-ready`. Submission readiness belongs in `challenge_ops/SUBMISSION_AUDIT.md`.

@@ -188,6 +188,31 @@ esac
 
 LOG_ROOT="$LOG_ROOT_BASE/$EXPERIMENT_ID"
 
+if [[ -f "$BASELINE_COMPARE_JSON" ]]; then
+  if ! "$PYTHON_BIN" - "$BASELINE_COMPARE_JSON" "$EXPERIMENT_ID" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+compare_path = Path(sys.argv[1])
+experiment_id = sys.argv[2]
+obj = json.loads(compare_path.read_text(encoding="utf-8"))
+anchor_status = obj.get("anchor_status") or ""
+requires_rebuild = bool(obj.get("requires_rebuild_before_ablation"))
+if experiment_id != "control" and requires_rebuild:
+    print(
+        f"refusing {experiment_id}: compare target {compare_path} is marked "
+        f"{anchor_status or 'provisional'} and requires a rebuilt frozen control anchor before surrogate ablations",
+        file=sys.stderr,
+    )
+    raise SystemExit(2)
+print(f"compare_json_anchor_status={anchor_status or 'unmarked'}")
+PY
+  then
+    exit 1
+  fi
+fi
+
 if [[ "$need_shard_scores" -eq 1 && ! -f "$SHARD_SCORE_PATH_VALUE" ]]; then
   mkdir -p "$SHARD_SCORE_ROOT"
   "$PYTHON_BIN" "$REPO_DIR/scripts/experiments/score_train_shards.py" \
@@ -212,6 +237,17 @@ fi
 env_args=("RUN_ID=$RUN_ID" "LOG_ROOT=$LOG_ROOT")
 env_args+=("${common_env[@]}")
 env_args+=("${experiment_env[@]}")
+env_args+=(
+  "EXPERIMENT_HARDWARE=$EXPERIMENT_HARDWARE"
+  "DATASET_VARIANT=$DATASET_VARIANT"
+  "TOKENIZER_VARIANT=$TOKENIZER_VARIANT"
+  "CORE_HPARAMS=$CORE_HPARAMS"
+  "TRACK_INTENT=$TRACK_INTENT"
+  "WALLCLOCK_TARGET=$WALLCLOCK_TARGET"
+  "WORKFLOW_WRAPPER_PATH=$REPO_DIR/scripts/experiments/run_1xh100_ablation.sh"
+  "COMPARE_JSON_PATH=$BASELINE_COMPARE_JSON"
+  "COMPARE_JSON_LABEL=$BASELINE_COMPARE_LABEL"
+)
 
 (
   cd "$REPO_DIR"

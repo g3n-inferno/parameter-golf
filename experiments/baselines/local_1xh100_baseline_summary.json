@@ -1,4 +1,5 @@
 {
+  "anchor_status": "legacy_compatibility_only",
   "baseline_label": "runpod_1xh100_control_anchor",
   "canonical_compare_path": "experiments/baselines/runpod_1xh100_control_anchor_summary.json",
   "code_bytes": 47686,
@@ -18,6 +19,9 @@
   "model_int8_zlib_bytes": 13990174,
   "peak_memory_allocated_mib": 10239,
   "peak_memory_reserved_mib": null,
+  "provenance_status": "user_provided_summary_only",
+  "raw_log_present": false,
+  "raw_result_packet_present": false,
   "scope": "1xH100-surrogate",
   "stop_reason": "wallclock_cap",
   "stop_step": 1444,
