@@ -37,6 +37,18 @@ python scripts/autonomy/controller.py plan-experiment ...
 python scripts/autonomy/controller.py plan-experiment ... --dry-run
 ```
 
+- Before any remote action, require a local approval token and verify it with:
+
+```bash
+python scripts/autonomy/controller.py check-remote-approval --run-id ... --hardware-target ...
+```
+
+- If that check fails, stop immediately and wait for the supervisor or user to grant approval with:
+
+```bash
+python scripts/autonomy/controller.py grant-remote-approval ...
+```
+
 - After any meaningful run, generate the result packet and sync the ledger:
 
 ```bash
