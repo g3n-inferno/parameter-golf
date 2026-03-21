@@ -1,6 +1,6 @@
 # Submission Audit
 
-Last updated: `2026-03-21`
+Last updated: `2026-03-20`
 
 Use this file before any submission recommendation, candidate folder PR prep, or claim that a run is record-ready.
 This file is an audit template and checklist, not a replacement for the compliance scripts.
@@ -10,7 +10,7 @@ This file is an audit template and checklist, not a replacement for the complian
 - Active candidate: `none recorded yet`
 - Submission intent: `not started`
 - Last completed preflight: `none recorded yet`
-- Latest gating evidence: provenance-hardened same-pod control rebuilds on reused stable-profile pod `474jlphqpo5n8x` improved the remote control path to `val_bpb=1.32963305`, `1.32776835`, and `1.33473550`, all with pinned base commit `c59338a...` plus recorded wrapper/data/tokenizer/compare hashes. That is much closer to the provisional legacy Runpod `1xH100` control anchor `ablate_control_1xh100_1024` at `1.32157507`, but the best rebuilt rerun still missed the legacy `+0.005` recovery gate by `+0.00119328`, and the third rerun widened again. No submission candidate was promoted, and no surrogate ablation was launched.
+- Latest gating evidence: the integrated upstream repo now contains materially stronger leaderboard records, with the current repo-best anchor at `records/track_10min_16mb/2026-03-20_10L_Int5MLP_MuonWD04_SWA50` reporting `mean val_bpb=1.14276` across `3` seeds and `15900000` total bytes. Local fork-side `1xH100-surrogate` control rebuilds remain unstable at `val_bpb=1.32963305`, `1.32776835`, and `1.33473550` on reused stable-profile pod `474jlphqpo5n8x`, all with pinned base commit `c59338a...` plus recorded wrapper/data/tokenizer/compare hashes. No local candidate is near submission-ready, and no surrogate ablation should be promoted based on the current control-family evidence.
 
 ## Mandatory Checks
 

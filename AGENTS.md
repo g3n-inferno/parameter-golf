@@ -49,6 +49,12 @@ Follow this order unless the task is tightly scoped and already localized:
 4. Experiment tracking.
 5. Submission safety checks.
 
+## Fork Sync And Default Base
+
+- Preserve the current fork state before any upstream integration by creating a backup branch or tag from the pre-sync `main` SHA and stashing or otherwise preserving any dirty worktree state.
+- When the fork is materially behind `upstream/main`, prefer creating a fresh integration branch from `upstream/main` and replaying the fork-only work that should survive rather than merging a long-diverged branch forward blindly.
+- After the integrated branch is validated, treat the upstream-integrated local `main` as the default base for future work. New experiment branches should fork from that integrated base, not from an older pre-sync fork state.
+
 ## Challenge Coordination System
 
 Use the repo-local coordination layer under `challenge_ops/` as the durable handoff and memory surface for Codex, the Project GPT, and Codex subagents.
@@ -154,7 +160,7 @@ For future Codex-run remote experiments, the fastest safe path is:
 3. Start the local Runpod challenge tracker session as soon as pod start is requested when init-time accounting matters.
 4. Verify actual access, in this order: `runpodctl pod get`, `runpodctl ssh info`, direct SSH reachability, then Jupyter fallback.
 5. Mark the tracker session ready once SSH or Jupyter is genuinely usable.
-6. Confirm `/workspace/parameter-golf/.git` exists. If not, reclone the repo and pull `origin/main`.
+6. Confirm `/workspace/parameter-golf/.git` exists. If not, reclone the repo from the intended fork or integration remote. If it does exist, fetch both `origin` and `upstream` and check out the intended integrated base branch before running anything expensive.
 7. Run `bash scripts/runpod/verify_pod_env.sh`.
 8. Download the exact dataset needed for the intended comparison.
 9. Run the experiment through the tracker wrapper or the explicit tracker lifecycle, not as an untracked hand-edited trainer command.
@@ -170,7 +176,7 @@ When reporting results, always distinguish:
 
 ## Current Launcher Baseline
 
-- `train_gpt.py` is currently 1001 lines.
+- `train_gpt.py` is currently 1307 lines.
 - `train_gpt_mlx.py` is currently 978 lines.
 
 ## Delegation Policy
