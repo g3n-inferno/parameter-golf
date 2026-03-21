@@ -1,16 +1,16 @@
 # Current Frontier
 
-Last updated: `2026-03-21`
+Last updated: `2026-03-20`
 
 This file is the Project GPT and Codex quick-read memory for the current repo frontier.
 Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS_INDEX.md`.
 
 ## Best Known Result
 
-- Confirmed repo-best leaderboard-track result: `Long Context Seq2048 v2`
-  - Source: `records/track_10min_16mb/2026-03-18_LongContextSeq2048/README.md`
-  - Exact printed metric: `final_int8_zlib_roundtrip_exact val_bpb=1.20576485`
-  - Artifact size: `15867270` total bytes
+- Confirmed repo-best leaderboard-track result: `10L Int5-MLP + BigramHash(10240) + SWA(frac=0.4) + WD=0.04`
+  - Source: `records/track_10min_16mb/2026-03-20_10L_Int5MLP_MuonWD04_SWA50/README.md`
+  - Exact reported metric: `mean val_bpb=1.14276` across `3` seeds
+  - Artifact size: `15900000` total bytes from `submission.json`
   - Scope: `8xH100-leaderboard`
 - Confirmed public repo baseline anchor: `Naive Baseline`
   - Source: `records/track_10min_16mb/2026-03-17_NaiveBaseline/submission.json`
@@ -26,6 +26,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 
 | Anchor | Scope | Exact `val_bpb` | Notes |
 | --- | --- | ---: | --- |
+| `10L Int5-MLP + BigramHash(10240) + SWA(frac=0.4) + WD=0.04` | `8xH100-leaderboard` | `1.14276` | Current upstream repo-best leaderboard anchor; sliding-window eval plus mixed int5/int6 quantization, bigram-hash context, and SWA. |
 | `Naive Baseline` | `8xH100-leaderboard` | `1.22436570` | Public leaderboard baseline and record-track comparison anchor. |
 | `Runpod 1xH100 provisional legacy control anchor` | `1xH100-surrogate` | `1.32157507` | Best historical single-GPU control-family metric so far, represented by `ablate_control_1xh100_1024`, but only preserved via ledger-mirrored compare JSON and inferred git lineage; treat it as a provisional legacy anchor until a new frozen anchor is rebuilt. |
 | `Runpod 1xH100 rebuilt-control best rerun` | `1xH100-surrogate` | `1.32776835` | Best provenance-hardened same-pod control rerun so far, represented by `ablate_control_1xh100_20260321_runpod_frozen_anchor_b` on reused pod `474jlphqpo5n8x` with pinned base commit `c59338a...` and recorded wrapper/data/tokenizer/compare hashes. |
@@ -36,7 +37,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - `long_context_seq2048`
   - Standardized name: `seq2048_long_context`
   - Verdict: `variant / already-tried / positive / track-candidate @ 8xH100-leaderboard`
-  - Evidence: best confirmed repo result.
+  - Evidence: still a positive leaderboard-track direction, but no longer the repo-best result after the upstream record additions.
 - `fp16_embed_warmdown`
   - Standardized name: `fp16_tied_embedding_with_warmdown`
   - Verdict: `variant / already-tried / positive / track-candidate @ 8xH100-leaderboard`
@@ -45,6 +46,18 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - Standardized name: `sliding_window_evaluation_stride64`
   - Verdict: `novel / already-tried / positive / track-candidate @ 8xH100-leaderboard`
   - Evidence: `records/track_10min_16mb/2026-03-19_SlidingWindowEval`.
+- `mixed_int5_int6_quantization`
+  - Standardized name: `mixed_int5_int6_quantization_with_bigramhash_swa`
+  - Verdict: `variant / already-tried / positive / track-candidate @ 8xH100-leaderboard`
+  - Evidence: current repo-best `records/track_10min_16mb/2026-03-20_10L_Int5MLP_MuonWD04_SWA50`.
+- `smeargate_bigramhash_mlp3x`
+  - Standardized name: `smeargate_bigramhash_mlp3x_muonwd_swa`
+  - Verdict: `novel / already-tried / positive / track-candidate @ 8xH100-leaderboard`
+  - Evidence: `records/track_10min_16mb/2026-03-20_Int6_MLP3x_SmearGate_BigramHash_MuonWD_SWA`.
+- `int6_qat_sliding_window_eval`
+  - Standardized name: `int6_qat_mlp3x_sliding_window_eval`
+  - Verdict: `variant / already-tried / positive / track-candidate @ 8xH100-leaderboard`
+  - Evidence: `records/track_10min_16mb/2026-03-19_MLP3x_QAT_Int6_SlidingWindow`.
 
 ## Known Mixed Or Inconclusive Ideas
 
@@ -76,7 +89,8 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - Confirmed: the provisional legacy anchor `ablate_control_1xh100_1024` is not recoverable as a fully frozen anchor today because its raw log/result packet are absent and its canonical compare JSON is mirrored from `experiments/ledger.csv` with only inferred commit/export lineage.
 - Confirmed: the byte drift is not just code drift. The export family changed from `code_bytes=48294` on the provisional legacy anchor to `61795` on later reruns, but the larger same-family change is in `model_int8_zlib_bytes` (`13611740` -> `12878462` -> `12435489`) as the worse reruns stop earlier and compress much smaller.
 - Confirmed: three provenance-hardened same-pod control rebuilds on reused pod `474jlphqpo5n8x` shared pinned base commit `c59338a...`, `train_gpt.py` hash `15846ddc...`, dataset manifest hash `c0ebc88d...`, tokenizer hash `4f5e8adb...`, and compare JSON hash `aa400747...`, yet still spread across `val_bpb=1.32776835` to `1.33473550`.
-- Inferred: the dominant issue is deeper non-reproducibility in the Runpod `1xH100-surrogate` control path rather than a simple bad-host mismatch, and more paid `1xH100-surrogate` ablations should stay paused because even the provenance-hardened same-pod rebuild did not clear the provisional-legacy `+0.005` recovery gate.
+- Confirmed: upstream moved the leaderboard frontier substantially through new record folders, but those additions are mostly new record recipes and README updates, not a proven fix to the fork-local `1xH100-surrogate` instability path.
+- Inferred: the dominant issue is deeper non-reproducibility in the Runpod `1xH100-surrogate` control path rather than a simple bad-host mismatch, and syncing to current upstream is not, by itself, evidence that the surrogate instability is solved.
 
 ## Most Promising Next Experiment
 
@@ -85,7 +99,7 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - Why:
   - Confirmed the rebuilt control family is now provenance-correct but still not stable enough: same pod, same overlay hashes, and same dataset/tokenizer hashes still produced `1.32963305`, `1.32776835`, and `1.33473550`.
   - Confirmed the best rebuilt rerun missed the provisional-legacy `+0.005` recovery gate by `+0.00119328`, and the third rerun widened again instead of tightening.
-  - The highest-value next move is therefore still control-path diagnosis, not a paid model ablation.
+  - The highest-value next move is therefore still control-path diagnosis, not a paid model ablation, even after integrating the newer upstream record history.
 - Guardrails before any expensive run:
   - keep dataset and tokenizer unchanged
   - keep result reporting apples to apples
@@ -103,6 +117,9 @@ Artifact cap: `16000000` bytes
 
 | Run | Scope | Counted total bytes | Headroom |
 | --- | --- | ---: | ---: |
+| `10L Int5-MLP + BigramHash(10240) + SWA(frac=0.4) + WD=0.04` | `8xH100-leaderboard` | `15900000` | `100000` |
+| `Int6 MLP3x + SmearGate + BigramHash + OrthoInit + Muon WD + SWA` | `8xH100-leaderboard` | `15862650` | `137350` |
+| `11L MLP3x + WD=0.04 + Int6 QAT + zstd-22 + Sliding Window Eval` | `8xH100-leaderboard` | `15427455` | `572545` |
 | `Naive Baseline` | `8xH100-leaderboard` | `15863489` | `136511` |
 | `Long Context Seq2048 v2` | `8xH100-leaderboard` | `15867270` | `132730` |
 | `Sliding Window Eval` | `8xH100-leaderboard` | `15874829` | `125171` |
