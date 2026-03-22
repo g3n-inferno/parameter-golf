@@ -35,6 +35,7 @@ Supported experiment_id values:
   quality_top_half
   shared_depth
   shared_depth_stable
+  shared_depth_ttc_rsd_lite
   shared_depth_experts_fixed
   shared_depth_experts_router
 
@@ -179,6 +180,23 @@ case "$EXPERIMENT_ID" in
       "SHARED_DEPTH_UNIQUE_BLOCKS=3"
       "SHARED_DEPTH_TOTAL_PASSES=9"
       "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+    )
+    ;;
+  shared_depth_ttc_rsd_lite)
+    RUN_ID="${RUN_ID:-ablate_shared_depth_ttc_rsd_lite_1xh100}"
+    CORE_HPARAMS="seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse ttc_rsd teacher11 every4 lambda0.05 warmup100"
+    NOTES="training-only recurrent self-distillation on the shared-depth student path with an 11-pass detached teacher every 4 steps"
+    experiment_env=(
+      "SHARED_DEPTH_MODE=cyclic"
+      "SHARED_DEPTH_UNIQUE_BLOCKS=3"
+      "SHARED_DEPTH_TOTAL_PASSES=9"
+      "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+      "TTC_DISTILL_MODE=recurrent_logits"
+      "TTC_STUDENT_TOTAL_PASSES=9"
+      "TTC_TEACHER_TOTAL_PASSES=11"
+      "TTC_DISTILL_EVERY=4"
+      "TTC_DISTILL_LAMBDA=0.05"
+      "TTC_DISTILL_WARMUP_STEPS=100"
     )
     ;;
   shared_depth_experts_fixed)

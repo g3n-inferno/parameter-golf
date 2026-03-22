@@ -81,6 +81,14 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
   - Standardized name: `fp16_tied_embedding_1xh100_probe`
   - Verdict: `variant / already-tried / negative / non-record @ 1xH100-surrogate`
   - Evidence: `ablate_fp16_embed_1xh100_1024` regressed to `1.32389328`.
+- `shared_depth_stable_1xh100_probe`
+  - Standardized name: `shared_depth_stable_cyclic_inv_sqrt_reuse`
+  - Verdict: `variant / already-tried / negative / non-record @ 1xH100-surrogate`
+  - Evidence: fresh same-pod control `ablate_shared_depth_stable_1xh100_retry1` on official-template pod `mf8286d28a4gdi` completed at `val_bpb=1.41961582`, which was `+0.06677653` worse than the fresh-template baseline-style control reference while still leaving `11058914` bytes of artifact headroom.
+- `shared_depth_ttc_rsd_lite`
+  - Standardized name: `shared_depth_recurrent_self_distillation_lite`
+  - Verdict: `variant / already-tried / negative / non-record @ 1xH100-surrogate`
+  - Evidence: same-pod TTC retry `ablate_shared_depth_ttc_rsd_lite_1xh100_retry1` finished at `val_bpb=1.43462137`, `stop_step=1085`, and `total_int8_zlib_bytes=4568999`, which was `+0.01500555` worse than the immediately preceding shared-depth control while also taking `324` fewer steps under the same `600s` cap.
 - `smeargate_bigramhash_mlp3x_1xh100_probe`
   - Standardized name: `smeargate_bigramhash_mlp3x_muonwd_swa`
   - Verdict: `novel / already-tried / negative / non-record @ 1xH100-surrogate`
@@ -98,6 +106,9 @@ Use it with `experiments/ledger.csv`, `/records`, and `challenge_ops/TRIED_IDEAS
 - Confirmed: on that same unchanged pod/container, run 2 improved run 1 by `0.00210433` `val_bpb`, reached `25` additional steps under the same `600s` cap, and reduced `step_avg_ms` by `9.37`, which is direct evidence that warm-state effects matter on the current `1xH100-surrogate` path.
 - Confirmed: the direct warmed second-run `1xH100-surrogate` of the leaderboard `Int6 MLP3x + SmearGate + BigramHash + OrthoInit + Muon WD + SWA` family (`smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model`) was decisively poor on the current control path: `val_bpb=1.49761060`, `stop_step=968`, `step_avg_ms=620.04`, `final_eval_time_ms=1220523`, and counted `total_int8_zlib_bytes=16290010`, which is `290010` bytes over the challenge cap.
 - Confirmed: relative to the immediate warm-up control on the same pod (`smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control` at `1.34956718`), that warmed SmearGate probe regressed by `+0.14804342` `val_bpb` while also taking `163` fewer optimizer steps under the same `600s` cap.
+- Confirmed: a fresh same-pod shared-depth control/TTC pair on new official-template pod `mf8286d28a4gdi` finished at `val_bpb=1.41961582` for `ablate_shared_depth_stable_1xh100_retry1` and `1.43462137` for `ablate_shared_depth_ttc_rsd_lite_1xh100_retry1`, so the TTC variant regressed by `+0.01500555` `val_bpb` relative to its own same-pod control.
+- Confirmed: that TTC retry also stopped `324` steps earlier (`1085` vs `1409`) and logged `teacher_time_share` near `0.143` once the `lambda=0.05` schedule saturated, which is direct evidence that the added train-time teacher compute imposed a meaningful throughput penalty on the current `1xH100-surrogate` path.
+- Confirmed: the first TTC launch failed immediately when the teacher used more total passes than the student had skip weights for; a minimal guard that omits extra weighted skips beyond the student skip-weight budget fixed the crash without changing export behavior.
 - Confirmed: the provisional legacy anchor `ablate_control_1xh100_1024` is not recoverable as a fully frozen anchor today because its raw log/result packet are absent and its canonical compare JSON is mirrored from `experiments/ledger.csv` with only inferred commit/export lineage.
 - Confirmed: the byte drift is not just code drift. The export family changed from `code_bytes=48294` on the provisional legacy anchor to `61795` on later reruns, but the larger same-family change is in `model_int8_zlib_bytes` (`13611740` -> `12878462` -> `12435489`) as the worse reruns stop earlier and compress much smaller.
 - Confirmed: three provenance-hardened same-pod control rebuilds on reused pod `474jlphqpo5n8x` shared pinned base commit `c59338a...`, `train_gpt.py` hash `15846ddc...`, dataset manifest hash `c0ebc88d...`, tokenizer hash `4f5e8adb...`, and compare JSON hash `aa400747...`, yet still spread across `val_bpb=1.32776835` to `1.33473550`.
@@ -152,6 +163,8 @@ Artifact cap: `16000000` bytes
 | `control_path_warm_state_pair_20260321_run1` | `1xH100-surrogate` | `13344164` | `2655836` |
 | `control_path_warm_state_pair_20260321_run2` | `1xH100-surrogate` | `13302509` | `2697491` |
 | `control_path_diagnosis_20260321_fresh_template_runpod` | `1xH100-surrogate` | `12808876` | `3191124` |
+| `ablate_shared_depth_stable_1xh100_retry1` | `1xH100-surrogate` | `4941086` | `11058914` |
+| `ablate_shared_depth_ttc_rsd_lite_1xh100_retry1` | `1xH100-surrogate` | `4568999` | `11431001` |
 | `smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control` | `1xH100-surrogate` | `12843418` | `3156582` |
 | `smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model` | `1xH100-surrogate` | `16290010` | `-290010` |
 

@@ -1,0 +1,209 @@
+{
+  "artifact_cap_bytes": 16000000,
+  "artifact_cap_ok": true,
+  "branch": "main",
+  "code_bytes": 72579,
+  "code_path": "train_gpt.py",
+  "commit_sha": "6235d57295cf2ef0e4a5289b0c2a621b8948b304",
+  "compare_target": {
+    "anchor_status": null,
+    "baseline_label": null,
+    "compatibility_note": null,
+    "final_val_bpb": 1.35283929,
+    "final_val_loss": 2.28421247,
+    "label": "fresh_template_control_path",
+    "log_path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\artifacts\\runpod\\control_path_diagnosis_20260321_fresh_template_runpod\\run.log",
+    "path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\challenge_ops\\results\\2026-03-21_control_path_diagnosis_20260321_fresh_template_runpod.result.json",
+    "provenance_status": null,
+    "raw_log_present": null,
+    "raw_result_packet_present": null,
+    "requires_rebuild_before_ablation": null,
+    "source_commit_sha": null,
+    "source_commit_sha_inferred": null,
+    "source_run_id": null,
+    "total_submission_size_int8_zlib_bytes": 12808876
+  },
+  "comparison": {
+    "delta_bytes_total": -7867790,
+    "delta_eval_time_ms": -21,
+    "delta_stop_step": 302,
+    "delta_val_bpb": 0.06677653000000006,
+    "delta_val_loss": 0.1127493799999999,
+    "label": "fresh_template_control_path"
+  },
+  "confirmed_findings": [
+    "The patched shared-depth control path completed on Runpod 1xH100 with final_int8_zlib_roundtrip_exact val_bpb=1.41961582 at stop_step=1409.",
+    "The counted artifact size was 4941086 bytes total_int8_zlib, with code_bytes=72579 and model_int8_zlib_bytes=4868507.",
+    "Relative to the fresh-template control reference at val_bpb=1.35283929, this shared-depth control regressed by +0.06677653 val_bpb while reaching +302 more optimizer steps under the same 600s cap."
+  ],
+  "core_hparams": "seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse",
+  "counted_model_bytes": 4868507,
+  "counted_model_bytes_source": "model_int8_zlib_bytes",
+  "counted_total_bytes": 4941086,
+  "counted_total_bytes_source": "total_submission_size_int8_zlib_bytes",
+  "dataset_variant": "fineweb10B_sp1024",
+  "date": "2026-03-21",
+  "exact_command": "RUN_ID=ablate_shared_depth_stable_1xh100_retry1 TARGET_GPU_LABEL=h100_sxm_shared_depth_control DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 VAL_LOSS_EVERY=200 BASELINE_COMPARE_JSON=/workspace/parameter-golf/challenge_ops/results/2026-03-21_control_path_diagnosis_20260321_fresh_template_runpod.result.json bash scripts/experiments/run_1xh100_ablation.sh shared_depth_stable",
+  "experiment_id": "shared_depth_ttc_rsd_lite_runpod_20260321_control",
+  "final_eval_time_ms": 11155,
+  "final_metric_source": "final_int8_zlib_roundtrip_exact",
+  "final_val_bpb": 1.41961582,
+  "final_val_loss": 2.39696185,
+  "hardware": "Runpod 1xH100 pod",
+  "idea_label": "Shared-Depth Stable",
+  "inferred_conclusions": [
+    "The shared-depth stable control is materially worse than the fresh baseline-style control on the current 1xH100 surrogate path, but it leaves large artifact headroom for train-time-compute variants."
+  ],
+  "iterations": 20000,
+  "last_logged_step_avg_ms": 426.03,
+  "last_logged_train_time_ms": 600282,
+  "last_step": 1409,
+  "lineage": "variant",
+  "log_path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\logs\\experiments\\next_1xh100_workstream\\shared_depth_stable\\20260322_010500_ablate_shared_depth_stable_1xh100_retry1\\run.log",
+  "model_bytes": 23114331,
+  "model_int8_zlib_bytes": 4868507,
+  "notes": "Fresh same-pod shared-depth control under patched train_gpt.py for TTC comparison.",
+  "peak_memory_allocated_mib": 10127,
+  "peak_memory_reserved_mib": 10290,
+  "provenance": {
+    "code": {
+      "bytes": 73872,
+      "path": "/workspace/parameter-golf/train_gpt.py",
+      "sha256": "168532ac3a0d31ab54d1d6fd878db38a606cbf7122f1bf313aacb982e91c4dae"
+    },
+    "compare_json": {
+      "anchor_status": null,
+      "baseline_label": null,
+      "compatibility_note": null,
+      "final_val_bpb": 1.35283929,
+      "final_val_loss": 2.28421247,
+      "label": "runpod_1xh100_control_anchor",
+      "log_path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\artifacts\\runpod\\control_path_diagnosis_20260321_fresh_template_runpod\\run.log",
+      "path": "/workspace/parameter-golf/challenge_ops/results/2026-03-21_control_path_diagnosis_20260321_fresh_template_runpod.result.json",
+      "provenance_status": null,
+      "raw_log_present": null,
+      "raw_result_packet_present": null,
+      "requires_rebuild_before_ablation": null,
+      "sha256": "e734592bcafed12513a3a362e42cee6d964447ff8debd2ca6c0b40b6da1f9e3a",
+      "source_commit_sha": null,
+      "source_commit_sha_inferred": null,
+      "source_run_id": null,
+      "total_submission_size_int8_zlib_bytes": 12808876
+    },
+    "core_hparams": "seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse",
+    "created_at_utc": "2026-03-22T01:05:04Z",
+    "dataset": {
+      "expected_train_shards": 80,
+      "manifest_fields": [
+        "name",
+        "size_bytes"
+      ],
+      "manifest_sha256": "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+      "path": "/workspace/parameter-golf/data/datasets/fineweb10B_sp1024",
+      "sentinel_shard_hashes": [
+        {
+          "name": "fineweb_train_000000.bin",
+          "sha256": "afadf92015bbb3d5f2f51173132a191a2e4567ff33a67cc0ea4b00aed5c9bbcf",
+          "size_bytes": 200001024
+        },
+        {
+          "name": "fineweb_train_000079.bin",
+          "sha256": "8d9ed913332cdeb089b1106596c995ce780be4ee29281481e4d17af98bf4ba3e",
+          "size_bytes": 200001024
+        },
+        {
+          "name": "fineweb_val_000000.bin",
+          "sha256": "4860ad80c0516a150b6917ee9ed17be5d27a0726a0b44ba9fe28c323b527c86f",
+          "size_bytes": 124044716
+        }
+      ],
+      "train_shards_found": 80,
+      "train_total_bytes": 16000081920,
+      "val_shards_found": 1,
+      "val_total_bytes": 124044716
+    },
+    "dataset_variant": "fineweb10B_sp1024",
+    "exact_command": "env RUN_ID=ablate_shared_depth_stable_1xh100_retry1 DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py",
+    "git": {
+      "branch": "main",
+      "commit_sha": "6235d57295cf2ef0e4a5289b0c2a621b8948b304",
+      "dirty": true,
+      "status_short": [
+        "M challenge_ops/results/2026-03-21_control_path_diagnosis_20260321_fresh_template_runpod.result.json",
+        " M experiments/ledger.csv",
+        " M scripts/experiments/run_1xh100_ablation.sh",
+        " M train_gpt.py",
+        "?? challenge_ops/briefs/2026-03-21_shared_depth_ttc_rsd_lite_runpod_20260321.md"
+      ]
+    },
+    "hardware": "Runpod 1xH100 pod",
+    "host": {
+      "df_repo_dir": "Filesystem     1024-blocks     Used Available Capacity Mounted on\noverlay           20971520 15789888   5181632      76% /",
+      "fingerprint_sha256": "0886d6b5bed720f336197ff2f9395b055bd0993708a7e4f8d0928edddb1785e4",
+      "gpu_count": 1,
+      "gpu_names": [
+        "NVIDIA H100 80GB HBM3"
+      ],
+      "gpu_query_rows": [
+        "NVIDIA H100 80GB HBM3, 580.126.09, 81559 MiB, 00000000:9A:00.0"
+      ],
+      "hostname": "e52c0ec579e7",
+      "nvidia_smi_l": [
+        "GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-a9b7354e-cc86-3c72-e42a-719d08c6cd27)"
+      ],
+      "python": {
+        "platform": "Linux-6.8.0-90-generic-x86_64-with-glibc2.39",
+        "python_executable": "/usr/bin/python3",
+        "python_version": "3.12.3",
+        "sentencepiece_version": "0.2.1",
+        "torch_cuda_available": true,
+        "torch_cuda_version": "12.8",
+        "torch_device_count": 1,
+        "torch_version": "2.9.1+cu128"
+      },
+      "uname": "Linux e52c0ec579e7 6.8.0-90-generic #91-Ubuntu SMP PREEMPT_DYNAMIC Tue Nov 18 14:14:30 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux",
+      "vcpu_count": 208
+    },
+    "log_file": "/workspace/parameter-golf/logs/experiments/next_1xh100_workstream/shared_depth_stable/20260322_010500_ablate_shared_depth_stable_1xh100_retry1/run.log",
+    "repo_dir": "/workspace/parameter-golf",
+    "run_dir": "/workspace/parameter-golf/logs/experiments/next_1xh100_workstream/shared_depth_stable/20260322_010500_ablate_shared_depth_stable_1xh100_retry1",
+    "run_id": "ablate_shared_depth_stable_1xh100_retry1",
+    "schema_version": 1,
+    "target_gpu_label": "h100_sxm_shared_depth_control",
+    "tokenizer": {
+      "path": "/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model",
+      "sha256": "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a",
+      "size_bytes": 254483
+    },
+    "tokenizer_variant": "fineweb_1024_bpe.model",
+    "track_intent": "non-record",
+    "wallclock_target": "600s",
+    "wrappers": [
+      {
+        "bytes": 8497,
+        "path": "/workspace/parameter-golf/scripts/experiments/run_baseline_1gpu.sh",
+        "sha256": "8f5024481bedafdf7519290c72634822b66b79bc333afe65c9a7574f99c88311"
+      },
+      {
+        "bytes": 12339,
+        "path": "/workspace/parameter-golf/scripts/experiments/run_1xh100_ablation.sh",
+        "sha256": "8b683514be5ab189c6fdb08b72c86ac16a462440af36211a8806308852a5baa3"
+      }
+    ]
+  },
+  "result": "negative",
+  "run_id": "ablate_shared_depth_stable_1xh100_retry1",
+  "schema_version": 1,
+  "scope": "1xH100-surrogate",
+  "standardized_name": "shared_depth_stable_cyclic_inv_sqrt_reuse",
+  "state": "frontier",
+  "status": "completed",
+  "stop_reason": "wallclock_cap",
+  "stop_step": 1409,
+  "stop_train_time_ms": 600282,
+  "tokenizer_variant": "fineweb_1024_bpe.model",
+  "total_submission_size_bytes": 23186910,
+  "total_submission_size_int8_zlib_bytes": 4941086,
+  "track_intent": "non-record",
+  "wallclock_target": "600s"
+}

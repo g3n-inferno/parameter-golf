@@ -103,6 +103,12 @@ class Hyperparameters:
     shared_depth_expert_mode = os.environ.get("SHARED_DEPTH_EXPERT_MODE", "off")
     shared_depth_expert_hidden = int(os.environ.get("SHARED_DEPTH_EXPERT_HIDDEN", 64))
     shared_depth_expert_upper_passes = int(os.environ.get("SHARED_DEPTH_EXPERT_UPPER_PASSES", 3))
+    ttc_distill_mode = os.environ.get("TTC_DISTILL_MODE", "off")
+    ttc_student_total_passes = int(os.environ.get("TTC_STUDENT_TOTAL_PASSES", 9))
+    ttc_teacher_total_passes = int(os.environ.get("TTC_TEACHER_TOTAL_PASSES", 11))
+    ttc_distill_every = int(os.environ.get("TTC_DISTILL_EVERY", 4))
+    ttc_distill_lambda = float(os.environ.get("TTC_DISTILL_LAMBDA", 0.05))
+    ttc_distill_warmup_steps = int(os.environ.get("TTC_DISTILL_WARMUP_STEPS", 100))
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -184,6 +190,14 @@ class Muon(torch.optim.Optimizer):
                 curr += p.numel()
 
         return loss
+
+
+def recurrent_kl_div(student_logits: Tensor, teacher_logits: Tensor) -> Tensor:
+    return F.kl_div(
+        F.log_softmax(student_logits.float(), dim=-1),
+        F.softmax(teacher_logits.float(), dim=-1),
+        reduction="batchmean",
+    )
 
 
 # -----------------------------
@@ -937,6 +951,12 @@ class GPT(nn.Module):
             return self.blocks[pass_idx]
         return self.shared_blocks[pass_idx % self.shared_depth_unique_blocks]
 
+    def _pass_layout(self, total_passes: int | None = None) -> tuple[int, int, int]:
+        execution_passes = self.execution_passes if total_passes is None else total_passes
+        num_encoder_layers = execution_passes // 2
+        num_decoder_layers = execution_passes - num_encoder_layers
+        return execution_passes, num_encoder_layers, num_decoder_layers
+
     def _apply_shared_depth_experts(self, x: Tensor, pass_idx: int) -> tuple[Tensor, Tensor]:
         if self.shared_depth_expert_mode == "off" or pass_idx < self.shared_depth_expert_start:
             return x, torch.zeros(3, device=x.device, dtype=torch.float32)
@@ -953,24 +973,30 @@ class GPT(nn.Module):
         base_bytes_lut: Tensor,
         has_leading_space_lut: Tensor,
         is_boundary_token_lut: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+        *,
+        return_logits: bool = False,
+        total_passes_override: int | None = None,
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor] | tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
         x = self.tok_emb(input_ids)
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         skips: list[Tensor] = []
         residual_scale = self.shared_depth_residual_scale
         expert_mix = torch.zeros(3, device=x.device, dtype=torch.float32)
+        _, num_encoder_layers, num_decoder_layers = self._pass_layout(total_passes_override)
 
         # First half stores skips; second half reuses them in reverse order.
-        for i in range(self.num_encoder_layers):
+        for i in range(num_encoder_layers):
             x = self._active_block(i)(x, x0, residual_scale=residual_scale)
             x, expert_mix = self._apply_shared_depth_experts(x, i)
             skips.append(x)
-        for i in range(self.num_decoder_layers):
+        for i in range(num_decoder_layers):
             if skips:
-                x = x + self.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skips.pop()
-            x = self._active_block(self.num_encoder_layers + i)(x, x0, residual_scale=residual_scale)
-            x, expert_mix = self._apply_shared_depth_experts(x, self.num_encoder_layers + i)
+                skip = skips.pop()
+                if i < self.skip_weights.size(0):
+                    x = x + self.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skip
+            x = self._active_block(num_encoder_layers + i)(x, x0, residual_scale=residual_scale)
+            x, expert_mix = self._apply_shared_depth_experts(x, num_encoder_layers + i)
 
         x = self.final_norm(x).reshape(-1, x.size(-1))
         targets = target_ids.reshape(-1)
@@ -994,6 +1020,8 @@ class GPT(nn.Module):
         batch_target_bytes = token_bytes.to(dtype=token_losses.dtype).sum().clamp_min(1.0)
         nats_per_byte = token_losses.sum() / batch_target_bytes
         bytes_per_token = batch_target_bytes / max(targets.numel(), 1)
+        if return_logits:
+            return token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix, logits
         return token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix
 
 
@@ -1208,6 +1236,21 @@ def main() -> None:
         optimizers.insert(1, optimizer_head)
 
     n_params = sum(p.numel() for p in base_model.parameters())
+    if args.ttc_distill_mode not in {"off", "recurrent_logits"}:
+        raise ValueError(f"Unsupported TTC_DISTILL_MODE={args.ttc_distill_mode}")
+    if args.ttc_distill_mode != "off":
+        if base_model.shared_depth_mode == "off":
+            raise ValueError("TTC distillation requires SHARED_DEPTH_MODE to be enabled")
+        if args.ttc_student_total_passes != base_model.shared_depth_total_passes:
+            raise ValueError(
+                "TTC_STUDENT_TOTAL_PASSES must match SHARED_DEPTH_TOTAL_PASSES so export/eval stay on the student path"
+            )
+        if args.ttc_teacher_total_passes < args.ttc_student_total_passes:
+            raise ValueError("TTC_TEACHER_TOTAL_PASSES must be >= TTC_STUDENT_TOTAL_PASSES")
+        if args.ttc_distill_every <= 0:
+            raise ValueError("TTC_DISTILL_EVERY must be positive")
+        if args.ttc_distill_lambda < 0:
+            raise ValueError("TTC_DISTILL_LAMBDA must be non-negative")
     log0(f"model_params:{n_params}")
     log0(f"world_size:{world_size} grad_accum_steps:{grad_accum_steps}")
     log0("sdp_backends:cudnn=False flash=True mem_efficient=False math=False")
@@ -1223,6 +1266,13 @@ def main() -> None:
     expert_delta_params = sum(p.numel() for name, p in base_model.named_parameters() if name.startswith("shared_depth_experts"))
     expert_gate_params = sum(p.numel() for name, p in base_model.named_parameters() if name.startswith("shared_depth_expert_") and not name.startswith("shared_depth_experts"))
     log0(f"shared_depth_experts:mode:{base_model.shared_depth_expert_mode} upper_passes:{base_model.shared_depth_expert_upper_passes} hidden:{base_model.shared_depth_expert_hidden} delta_params:{expert_delta_params} gate_params:{expert_gate_params}")
+    distill_enabled = args.ttc_distill_mode != "off"
+    log0(
+        f"ttc_distill:mode:{args.ttc_distill_mode} enabled:{int(distill_enabled)} "
+        f"student_passes:{args.ttc_student_total_passes} teacher_passes:{args.ttc_teacher_total_passes} "
+        f"every:{args.ttc_distill_every} lambda:{args.ttc_distill_lambda:.6f} "
+        f"warmup_steps:{args.ttc_distill_warmup_steps}"
+    )
     log0(
         f"tie_embeddings:{args.tie_embeddings} embed_lr:{token_lr} "
         f"head_lr:{args.head_lr if base_model.lm_head is not None else 0.0} "
@@ -1302,6 +1352,12 @@ def main() -> None:
 
     training_time_ms = 0.0
     stop_after_step: int | None = None
+    distill_total_time_ms = 0.0
+    distill_total_calls = 0
+    last_distill_lambda = 0.0
+    last_distill_kl = 0.0
+    last_distill_teacher_ms = 0.0
+    last_distill_enabled_step = 0
     torch.cuda.synchronize()
     t0 = time.perf_counter()
 
@@ -1348,19 +1404,63 @@ def main() -> None:
         train_loss_nats_per_byte = torch.zeros((), device=device)
         train_batch_target_bytes = torch.zeros((), device=device)
         train_batch_bytes_per_token = torch.zeros((), device=device)
+        train_distill_kl = torch.zeros((), device=device)
+        train_distill_lambda = 0.0
+        train_distill_teacher_ms = 0.0
+        train_distill_calls = 0
         for micro_step in range(grad_accum_steps):
             if distributed:
                 model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
             x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
+            current_step = step + 1
+            distill_on_step = (
+                distill_enabled
+                and current_step % args.ttc_distill_every == 0
+                and args.ttc_distill_lambda > 0.0
+            )
+            distill_lambda = (
+                args.ttc_distill_lambda
+                * min(current_step / max(args.ttc_distill_warmup_steps, 1), 1.0)
+                if distill_on_step
+                else 0.0
+            )
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix = model(
+                student_outputs = model(
                     x,
                     y,
                     base_bytes_lut,
                     has_leading_space_lut,
                     is_boundary_token_lut,
+                    return_logits=distill_on_step,
                 )
+                if distill_on_step:
+                    token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix, student_logits = student_outputs
+                else:
+                    token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix = student_outputs
                 loss = select_training_loss(token_ce, nats_per_byte)
+            if distill_lambda > 0.0:
+                torch.cuda.synchronize()
+                t_teacher = time.perf_counter()
+                with torch.no_grad():
+                    with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
+                        teacher_outputs = base_model(
+                            x,
+                            y,
+                            base_bytes_lut,
+                            has_leading_space_lut,
+                            is_boundary_token_lut,
+                            return_logits=True,
+                            total_passes_override=args.ttc_teacher_total_passes,
+                        )
+                teacher_logits = teacher_outputs[-1].detach()
+                torch.cuda.synchronize()
+                teacher_ms = 1000.0 * (time.perf_counter() - t_teacher)
+                distill_kl = recurrent_kl_div(student_logits, teacher_logits)
+                loss = loss + distill_lambda * distill_kl
+                train_distill_kl += distill_kl.detach()
+                train_distill_lambda = distill_lambda
+                train_distill_teacher_ms += teacher_ms
+                train_distill_calls += 1
             train_loss += loss.detach()
             train_loss_token_ce += token_ce.detach()
             train_loss_nats_per_byte += nats_per_byte.detach()
@@ -1372,6 +1472,14 @@ def main() -> None:
         train_loss_nats_per_byte /= grad_accum_steps
         train_batch_target_bytes /= grad_accum_steps
         train_batch_bytes_per_token /= grad_accum_steps
+        train_distill_kl /= max(train_distill_calls, 1)
+        distill_total_time_ms += train_distill_teacher_ms
+        distill_total_calls += train_distill_calls
+        if train_distill_calls > 0:
+            last_distill_lambda = train_distill_lambda
+            last_distill_kl = train_distill_kl.item()
+            last_distill_teacher_ms = train_distill_teacher_ms / train_distill_calls
+            last_distill_enabled_step = step + 1
 
         frac = min(step / args.muon_momentum_warmup_steps, 1.0) if args.muon_momentum_warmup_steps > 0 else 1.0
         muon_momentum = (1 - frac) * args.muon_momentum_warmup_start + frac * args.muon_momentum
@@ -1396,13 +1504,26 @@ def main() -> None:
         )
         if should_log_train:
             expert_mix_str = "" if base_model.shared_depth_expert_mode == "off" else f" expert_mix:[{expert_mix[0].item():.3f},{expert_mix[1].item():.3f}] expert_delta_rms:{expert_mix[2].item():.6f}"
+            distill_str = (
+                f" distill_enabled:{int(distill_enabled)} distill_cadence:{args.ttc_distill_every} "
+                f"distill_lambda:{(train_distill_lambda if train_distill_calls > 0 else last_distill_lambda):.6f} "
+                f"distill_step:{int(train_distill_calls > 0)} distill_kl:{(train_distill_kl.item() if train_distill_calls > 0 else last_distill_kl):.6f} "
+                f"student_passes:{args.ttc_student_total_passes} teacher_passes:{args.ttc_teacher_total_passes} "
+                f"teacher_forward_ms:{(train_distill_teacher_ms / max(train_distill_calls, 1) if train_distill_calls > 0 else last_distill_teacher_ms):.2f} "
+                f"teacher_time_share:{(distill_total_time_ms / max(approx_training_time_ms, 1e-9)):.4f} "
+                f"last_distill_step:{last_distill_enabled_step}"
+                if distill_enabled
+                else " distill_enabled:0 distill_cadence:0 distill_lambda:0.000000 distill_step:0 distill_kl:0.000000 "
+                f"student_passes:{args.ttc_student_total_passes} teacher_passes:{args.ttc_teacher_total_passes} "
+                "teacher_forward_ms:0.00 teacher_time_share:0.0000 last_distill_step:0"
+            )
             log0(
                 f"step:{step}/{args.iterations} train_loss:{train_loss.item():.4f} "
                 f"train_time:{approx_training_time_ms:.0f}ms step_avg:{approx_training_time_ms / step:.2f}ms "
                 f"train_loss_token_ce:{train_loss_token_ce.item():.4f} "
                 f"train_loss_nats_per_byte:{train_loss_nats_per_byte.item():.4f} "
                 f"batch_target_bytes:{train_batch_target_bytes.item():.0f} "
-                f"batch_bytes_per_token:{train_batch_bytes_per_token.item():.4f}{expert_mix_str}"
+                f"batch_bytes_per_token:{train_batch_bytes_per_token.item():.4f}{expert_mix_str}{distill_str}"
             )
 
         # Needed to sync whether we've reached the wallclock cap.
