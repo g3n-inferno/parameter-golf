@@ -1,0 +1,800 @@
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas
+parameter golf shared trunk residual experts sequence level routing only
+this is a local smoke test for export roundtrip and artifact size logging
+shared depth cyclic reuse keeps one trunk and two small expert branches
+the router pools hidden state across the sequence and mixes expert deltas

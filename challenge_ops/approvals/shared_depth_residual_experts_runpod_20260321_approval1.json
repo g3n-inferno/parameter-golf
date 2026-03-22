@@ -1,0 +1,12 @@
+{
+  "active": true,
+  "approval_id": "shared_depth_residual_experts_runpod_20260321_approval1",
+  "approved_by": "user-via-chat",
+  "created_at_utc": "2026-03-22T00:10:59Z",
+  "hardware_target": "Runpod 1xH100 pod",
+  "kind": "remote_runpod",
+  "max_paid_runs": 1,
+  "notes": "User explicitly requested: Just use the runpod pod to do it in.",
+  "run_id": "shared_depth_residual_experts_runpod_20260321",
+  "schema_version": 1
+}

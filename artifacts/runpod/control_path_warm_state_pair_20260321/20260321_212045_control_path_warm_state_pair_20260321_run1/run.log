@@ -1,0 +1,25 @@
+[2026-03-21T21:20:45+00:00] baseline start
+repo_dir=/workspace/parameter-golf
+git_branch=main
+git_commit_sha=d1200c7c450a3da03dff0cdcf392b6340e645aaf
+verified gpu_count=1
+host_name=7b66b1cf9f6d
+host_vcpu_count=208
+verified train_shards_found=80 val_shards_found=1 tokenizer_vocab=1024 torch_version=2.9.1+cu128
+step:0/20000 val_loss:6.9357 val_bpb:4.1077 train_time:0ms step_avg:0.02ms
+step:200/20000 val_loss:2.8286 val_bpb:1.6753 train_time:94862ms step_avg:474.31ms
+step:400/20000 val_loss:2.5455 val_bpb:1.5076 train_time:188971ms step_avg:472.43ms
+step:600/20000 val_loss:2.4282 val_bpb:1.4381 train_time:284107ms step_avg:473.51ms
+step:800/20000 val_loss:2.3533 val_bpb:1.3937 train_time:380631ms step_avg:475.79ms
+step:1000/20000 val_loss:2.3005 val_bpb:1.3625 train_time:477340ms step_avg:477.34ms
+step:1200/20000 val_loss:2.2647 val_bpb:1.3413 train_time:572544ms step_avg:477.12ms
+step:1258/20000 val_loss:2.2598 val_bpb:1.3384 train_time:600322ms step_avg:477.20ms
+stopping_early: wallclock_cap train_time:600322ms step:1258/20000
+peak memory allocated: 10239 MiB reserved: 10748 MiB
+Serialized model: 67225047 bytes
+Code size: 61795 bytes
+Total submission size: 67286842 bytes
+Serialized model int8+zlib: 13282369 bytes (payload:17178912 raw_torch:17224025 payload_ratio:3.91x)
+Total submission size int8+zlib: 13344164 bytes
+final_int8_zlib_roundtrip val_loss:2.2619 val_bpb:1.3396 eval_time:11137ms
+final_int8_zlib_roundtrip_exact val_loss:2.26193109 val_bpb:1.33964300

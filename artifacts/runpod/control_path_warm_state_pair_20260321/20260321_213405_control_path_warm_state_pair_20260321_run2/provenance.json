@@ -1,0 +1,78 @@
+{
+    "wallclock_target":  "600s",
+    "tokenizer":  {
+                      "sha256":  "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a",
+                      "path":  "/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model"
+                  },
+    "core_hparams":  "seq1024 9x512 kv4 mlp_mult2 tied_emb baseline_schedule",
+    "code":  {
+                 "path":  "/workspace/parameter-golf/train_gpt.py",
+                 "sha256":  "15846ddcd260753dbd7023522e1e12a6d0dec0dd5cb5e5a69446b6407a3b7bd5",
+                 "bytes":  61795
+             },
+    "dataset_variant":  "fineweb10B_sp1024",
+    "exact_command":  "env RUN_ID=control_path_warm_state_pair_20260321_run2 DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py",
+    "compare_json":  {
+                         "label":  "runpod_1xh100_control_anchor",
+                         "path":  "C:/Users/g3n_i/Desktop/0. Coding/Projects/parameter-golf/experiments/baselines/runpod_1xh100_control_anchor_summary.json",
+                         "sha256":  "aa400747841436b3190d0cd239957f7ad8fd14a93232639f7f9a55a786959d99",
+                         "anchor_status":  "provisional_legacy"
+                     },
+    "target_gpu_label":  "h100",
+    "tokenizer_variant":  "fineweb_1024_bpe.model",
+    "git":  {
+                "branch":  "main",
+                "commit_sha":  "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+                "dirty":  true,
+                "status_short":  [
+                                     " M scripts/experiments/write_run_provenance.py",
+                                     "?? scripts/experiments/run_warm_state_control_pair.sh",
+                                     "?? scripts/experiments/summarize_warm_state_pair.py"
+                                 ]
+            },
+    "repo_dir":  "/workspace/parameter-golf",
+    "wrappers":  [
+                     {
+                         "path":  "/workspace/parameter-golf/scripts/experiments/run_warm_state_control_pair.sh",
+                         "sha256":  "ea12740f71aa0b0b7d61e1e9a7e0c6c028550548afdd09aecea6fa6a2b026e6b",
+                         "bytes":  6820
+                     },
+                     {
+                         "path":  "/workspace/parameter-golf/scripts/experiments/run_baseline_1gpu.sh",
+                         "sha256":  "79cc15090631a568c6c80c376520d7de51d864de992638c68066fa5ea5f3c5f8",
+                         "bytes":  8754
+                     }
+                 ],
+    "track_intent":  "non-record",
+    "dataset":  {
+                    "path":  "/workspace/parameter-golf/data/datasets/fineweb10B_sp1024",
+                    "manifest_sha256":  "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+                    "val_shards_found":  1,
+                    "train_shards_found":  80,
+                    "expected_train_shards":  80
+                },
+    "schema_version":  1,
+    "log_file":  "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_213405_control_path_warm_state_pair_20260321_run2/run.log",
+    "hardware":  "Runpod 1xH100 pod",
+    "run_dir":  "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_213405_control_path_warm_state_pair_20260321_run2",
+    "host":  {
+                 "vcpu_count":  208,
+                 "gpu_count":  1,
+                 "gpu_query_rows":  [
+                                        "NVIDIA H100 80GB HBM3, 570.172.08, 81559 MiB, 00000000:04:00.0"
+                                    ],
+                 "gpu_names":  [
+                                   "NVIDIA H100 80GB HBM3"
+                               ],
+                 "hostname":  "7b66b1cf9f6d",
+                 "fingerprint_sha256":  "c8d9064377e5b6e6e15e7fb44a2946b754c2e26ad0c2e5aec5f9e5dcbb42592e",
+                 "python":  {
+                                "torch_cuda_version":  "12.8",
+                                "sentencepiece_version":  "0.2.0",
+                                "torch_version":  "2.9.1+cu128",
+                                "python_version":  "3.12.3"
+                            }
+             },
+    "created_at_utc":  "2026-03-21T21:34:05Z",
+    "run_id":  "control_path_warm_state_pair_20260321_run2"
+}

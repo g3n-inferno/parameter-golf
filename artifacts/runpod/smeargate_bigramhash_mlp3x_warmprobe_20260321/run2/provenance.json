@@ -1,0 +1,103 @@
+{
+  "code": {
+    "bytes": 52243,
+    "path": "/workspace/parameter-golf/train_gpt.py",
+    "sha256": "138aeff57aeaf9e50b5077e0fd8388b038f8e09e5c7af3154109ea5815c11e2b"
+  },
+  "compare_json": null,
+  "core_hparams": "",
+  "created_at_utc": "2026-03-21T22:59:41Z",
+  "dataset": {
+    "expected_train_shards": 80,
+    "manifest_fields": [
+      "name",
+      "size_bytes"
+    ],
+    "manifest_sha256": "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+    "path": "/workspace/parameter-golf/data/datasets/fineweb10B_sp1024",
+    "sentinel_shard_hashes": [
+      {
+        "name": "fineweb_train_000000.bin",
+        "sha256": "afadf92015bbb3d5f2f51173132a191a2e4567ff33a67cc0ea4b00aed5c9bbcf",
+        "size_bytes": 200001024
+      },
+      {
+        "name": "fineweb_train_000079.bin",
+        "sha256": "8d9ed913332cdeb089b1106596c995ce780be4ee29281481e4d17af98bf4ba3e",
+        "size_bytes": 200001024
+      },
+      {
+        "name": "fineweb_val_000000.bin",
+        "sha256": "4860ad80c0516a150b6917ee9ed17be5d27a0726a0b44ba9fe28c323b527c86f",
+        "size_bytes": 124044716
+      }
+    ],
+    "train_shards_found": 80,
+    "train_total_bytes": 16000081920,
+    "val_shards_found": 1,
+    "val_total_bytes": 124044716
+  },
+  "dataset_variant": "",
+  "exact_command": "env RUN_ID=smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py",
+  "git": {
+    "branch": "main",
+    "commit_sha": "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+    "dirty": true,
+    "status_short": [
+      "M scripts/experiments/run_baseline_1gpu.sh",
+      " M scripts/experiments/write_run_provenance.py",
+      " M train_gpt.py",
+      "?? final_model.int8.ptz",
+      "?? final_model.pt"
+    ]
+  },
+  "hardware": "",
+  "host": {
+    "df_repo_dir": "Filesystem     1024-blocks     Used Available Capacity Mounted on\noverlay           20971520 16012452   4959068      77% /",
+    "fingerprint_sha256": "784aeb51ab5c4e52a12811d677b1ff4b8caf82706d5883facca1fe5dcc8de201",
+    "gpu_count": 1,
+    "gpu_names": [
+      "NVIDIA H100 80GB HBM3"
+    ],
+    "gpu_query_rows": [
+      "NVIDIA H100 80GB HBM3, 580.126.09, 81559 MiB, 00000000:5D:00.0"
+    ],
+    "hostname": "a7eb7797a5b7",
+    "nvidia_smi_l": [
+      "GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-898ba2a5-1320-5497-c8cd-f59a04e63a01)"
+    ],
+    "python": {
+      "platform": "Linux-6.8.0-90-generic-x86_64-with-glibc2.39",
+      "python_executable": "/usr/bin/python3",
+      "python_version": "3.12.3",
+      "sentencepiece_version": "0.2.1",
+      "torch_cuda_available": true,
+      "torch_cuda_version": "12.8",
+      "torch_device_count": 1,
+      "torch_version": "2.9.1+cu128"
+    },
+    "uname": "Linux a7eb7797a5b7 6.8.0-90-generic #91-Ubuntu SMP PREEMPT_DYNAMIC Tue Nov 18 14:14:30 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux",
+    "vcpu_count": 208
+  },
+  "log_file": "/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_225937_smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model/run.log",
+  "repo_dir": "/workspace/parameter-golf",
+  "run_dir": "/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_225937_smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model",
+  "run_id": "smeargate_bigramhash_mlp3x_warmprobe_20260321_run2_model",
+  "schema_version": 1,
+  "target_gpu_label": "h100_sxm_warm_model",
+  "tokenizer": {
+    "path": "/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model",
+    "sha256": "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a",
+    "size_bytes": 254483
+  },
+  "tokenizer_variant": "",
+  "track_intent": "",
+  "wallclock_target": "",
+  "wrappers": [
+    {
+      "bytes": 8497,
+      "path": "/workspace/parameter-golf/scripts/experiments/run_baseline_1gpu.sh",
+      "sha256": "8f5024481bedafdf7519290c72634822b66b79bc333afe65c9a7574f99c88311"
+    }
+  ]
+}

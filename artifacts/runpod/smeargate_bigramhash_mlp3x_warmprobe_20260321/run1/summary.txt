@@ -1,0 +1,5 @@
+log: smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control
+final metrics: val_loss=2.27868765 val_bpb=1.34956718 source=final_int8_zlib_roundtrip_exact
+artifact bytes: model_raw=67225047 model_int8_zlib=12781623 code=61795 total_raw=67286842 total_int8_zlib=12843418
+wallclock: stop_reason=wallclock_cap stop_train_time_ms=600014 stop_step=1131 iterations=20000 step_avg_ms=530.52 final_eval_time_ms=11118
+peak memory: allocated_mib=10239 reserved_mib=10748

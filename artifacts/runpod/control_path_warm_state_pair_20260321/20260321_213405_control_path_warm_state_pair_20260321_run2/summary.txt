@@ -1,0 +1,6 @@
+log: control_path_warm_state_pair_20260321_run2
+final metrics: val_loss=2.25837801 val_bpb=1.33753867 source=final_int8_zlib_roundtrip_exact
+artifact bytes: model_raw=67225047 model_int8_zlib=13240714 code=61795 total_raw=67286842 total_int8_zlib=13302509
+wallclock: stop_reason=wallclock_cap stop_train_time_ms=600222 stop_step=1283 iterations=20000 step_avg_ms=467.83 final_eval_time_ms=11156
+peak memory: allocated_mib=10239 reserved_mib=10554
+comparison: reference=runpod_1xh100_control_anchor delta_val_loss=+0.02695386 delta_val_bpb=+0.01596360 delta_bytes_total=-702055 delta_stop_step=-223

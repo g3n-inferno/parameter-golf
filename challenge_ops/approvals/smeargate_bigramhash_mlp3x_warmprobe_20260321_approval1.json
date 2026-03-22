@@ -1,0 +1,15 @@
+{
+  "active": false,
+  "approval_id": "smeargate_bigramhash_mlp3x_warmprobe_20260321_approval1",
+  "approved_by": "Codex",
+  "created_at_utc": "2026-03-21T22:39:07Z",
+  "hardware_target": "Runpod 1xH100 pod",
+  "kind": "remote_runpod",
+  "max_paid_runs": 1,
+  "notes": "Approved for exactly one fresh official-template 1xH100 warmed-pair surrogate probe of the SmearGate/BigramHash/MLP3x leaderboard family on 2026-03-21. Verify approval before any remote action; no other pod or hardware target is approved.",
+  "revocation_notes": "Warmed SmearGate BigramHash MLP3x surrogate probe completed; pod stopped.",
+  "revoked_at_utc": "2026-03-21T23:36:21Z",
+  "revoked_by": "Codex",
+  "run_id": "smeargate_bigramhash_mlp3x_warmprobe_20260321_runpod_pair",
+  "schema_version": 1
+}

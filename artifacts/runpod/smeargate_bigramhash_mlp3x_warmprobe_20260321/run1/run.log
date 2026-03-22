@@ -1,0 +1,110 @@
+[2026-03-21T22:46:11+00:00] baseline start
+repo_dir=/workspace/parameter-golf
+run_dir=/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_224611_smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control
+target_gpu_label=h100_sxm_warmup_control
+data_path=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024
+tokenizer_path=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model
+git_branch=main
+git_commit_sha=d1200c7c450a3da03dff0cdcf392b6340e645aaf
+verified gpu_count=1
+host_name=a7eb7797a5b7
+host_vcpu_count=208
+verified train_shards_found=80 val_shards_found=1 tokenizer_vocab=1024 torch_version=2.9.1+cu128
+wrote /workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_224611_smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control/provenance.json
+git_commit_sha=d1200c7c450a3da03dff0cdcf392b6340e645aaf
+code_sha256=15846ddcd260753dbd7023522e1e12a6d0dec0dd5cb5e5a69446b6407a3b7bd5
+dataset_manifest_sha256=c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9
+tokenizer_sha256=4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a
+provenance_json=/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_224611_smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control/provenance.json
+starting baseline training command
+exact_train_command=env RUN_ID=smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py
+logs/smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control.txt
+val_bpb:enabled tokenizer_kind=sentencepiece tokenizer_path=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model
+train_loader:dataset:fineweb10B_sp1024 train_shards:80
+train_loss_mode:token_ce normalization:mean_token_ce
+train_shards:score_path:none order:lexicographic filter:all filter_fraction:1.0000 included:80
+train_shards:included_files:fineweb_train_000000.bin,fineweb_train_000001.bin,fineweb_train_000002.bin,fineweb_train_000003.bin,fineweb_train_000004.bin,fineweb_train_000005.bin,fineweb_train_000006.bin,fineweb_train_000007.bin,fineweb_train_000008.bin,fineweb_train_000009.bin,fineweb_train_000010.bin,fineweb_train_000011.bin,fineweb_train_000012.bin,fineweb_train_000013.bin,fineweb_train_000014.bin,fineweb_train_000015.bin,fineweb_train_000016.bin,fineweb_train_000017.bin,fineweb_train_000018.bin,fineweb_train_000019.bin,fineweb_train_000020.bin,fineweb_train_000021.bin,fineweb_train_000022.bin,fineweb_train_000023.bin,fineweb_train_000024.bin,fineweb_train_000025.bin,fineweb_train_000026.bin,fineweb_train_000027.bin,fineweb_train_000028.bin,fineweb_train_000029.bin,fineweb_train_000030.bin,fineweb_train_000031.bin,fineweb_train_000032.bin,fineweb_train_000033.bin,fineweb_train_000034.bin,fineweb_train_000035.bin,fineweb_train_000036.bin,fineweb_train_000037.bin,fineweb_train_000038.bin,fineweb_train_000039.bin,fineweb_train_000040.bin,fineweb_train_000041.bin,fineweb_train_000042.bin,fineweb_train_000043.bin,fineweb_train_000044.bin,fineweb_train_000045.bin,fineweb_train_000046.bin,fineweb_train_000047.bin,fineweb_train_000048.bin,fineweb_train_000049.bin,fineweb_train_000050.bin,fineweb_train_000051.bin,fineweb_train_000052.bin,fineweb_train_000053.bin,fineweb_train_000054.bin,fineweb_train_000055.bin,fineweb_train_000056.bin,fineweb_train_000057.bin,fineweb_train_000058.bin,fineweb_train_000059.bin,fineweb_train_000060.bin,fineweb_train_000061.bin,fineweb_train_000062.bin,fineweb_train_000063.bin,fineweb_train_000064.bin,fineweb_train_000065.bin,fineweb_train_000066.bin,fineweb_train_000067.bin,fineweb_train_000068.bin,fineweb_train_000069.bin,fineweb_train_000070.bin,fineweb_train_000071.bin,fineweb_train_000072.bin,fineweb_train_000073.bin,fineweb_train_000074.bin,fineweb_train_000075.bin,fineweb_train_000076.bin,fineweb_train_000077.bin,fineweb_train_000078.bin,fineweb_train_000079.bin
+val_loader:shards pattern=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_val_*.bin tokens:62021632
+model_params:17059912
+world_size:1 grad_accum_steps:8
+sdp_backends:cudnn=False flash=True mem_efficient=False math=False
+attention_mode:gqa num_heads:8 num_kv_heads:4
+shared_depth:mode:off unique_blocks:0 total_passes:0 reuse_factor:1.0000 residual_scale_mode:off residual_scale:1.000000
+tie_embeddings:True embed_lr:0.05 head_lr:0.0 matrix_lr:0.04 scalar_lr:0.04
+train_batch_tokens:524288 train_seq_len:1024 iterations:20000 warmup_steps:20 max_wallclock_seconds:600.000
+seed:1337
+warmup_step:1/20
+warmup_step:2/20
+warmup_step:3/20
+warmup_step:4/20
+warmup_step:5/20
+warmup_step:6/20
+warmup_step:7/20
+warmup_step:8/20
+warmup_step:9/20
+warmup_step:10/20
+warmup_step:11/20
+warmup_step:12/20
+warmup_step:13/20
+warmup_step:14/20
+warmup_step:15/20
+warmup_step:16/20
+warmup_step:17/20
+warmup_step:18/20
+warmup_step:19/20
+warmup_step:20/20
+step:0/20000 val_loss:6.9357 val_bpb:4.1077 train_time:0ms step_avg:0.02ms
+step:1/20000 train_loss:6.9357 train_time:563ms step_avg:563.10ms train_loss_token_ce:6.9357 train_loss_nats_per_byte:2.8394 batch_target_bytes:160114 batch_bytes_per_token:2.4431
+step:2/20000 train_loss:16.7414 train_time:1074ms step_avg:536.97ms train_loss_token_ce:16.7414 train_loss_nats_per_byte:6.8784 batch_target_bytes:159565 batch_bytes_per_token:2.4348
+step:3/20000 train_loss:9.1671 train_time:1593ms step_avg:531.08ms train_loss_token_ce:9.1671 train_loss_nats_per_byte:3.7079 batch_target_bytes:162035 batch_bytes_per_token:2.4725
+step:4/20000 train_loss:6.5750 train_time:2164ms step_avg:541.08ms train_loss_token_ce:6.5750 train_loss_nats_per_byte:2.7214 batch_target_bytes:158363 batch_bytes_per_token:2.4164
+step:5/20000 train_loss:6.5881 train_time:2668ms step_avg:533.53ms train_loss_token_ce:6.5881 train_loss_nats_per_byte:2.6790 batch_target_bytes:161176 batch_bytes_per_token:2.4593
+step:6/20000 train_loss:6.6914 train_time:3269ms step_avg:544.80ms train_loss_token_ce:6.6914 train_loss_nats_per_byte:2.7459 batch_target_bytes:159835 batch_bytes_per_token:2.4389
+step:7/20000 train_loss:6.3696 train_time:3864ms step_avg:551.98ms train_loss_token_ce:6.3696 train_loss_nats_per_byte:2.5948 batch_target_bytes:160906 batch_bytes_per_token:2.4552
+step:8/20000 train_loss:6.2231 train_time:4395ms step_avg:549.32ms train_loss_token_ce:6.2231 train_loss_nats_per_byte:2.5205 batch_target_bytes:161857 batch_bytes_per_token:2.4697
+step:9/20000 train_loss:6.1034 train_time:4968ms step_avg:552.05ms train_loss_token_ce:6.1034 train_loss_nats_per_byte:2.4765 batch_target_bytes:161538 batch_bytes_per_token:2.4649
+step:10/20000 train_loss:5.9966 train_time:5487ms step_avg:548.70ms train_loss_token_ce:5.9966 train_loss_nats_per_byte:2.4500 batch_target_bytes:160483 batch_bytes_per_token:2.4488
+step:50/20000 train_loss:4.0792 train_time:27068ms step_avg:541.36ms train_loss_token_ce:4.0792 train_loss_nats_per_byte:1.6991 batch_target_bytes:157850 batch_bytes_per_token:2.4086
+step:100/20000 train_loss:3.3043 train_time:53865ms step_avg:538.65ms train_loss_token_ce:3.3043 train_loss_nats_per_byte:1.3510 batch_target_bytes:160372 batch_bytes_per_token:2.4471
+step:150/20000 train_loss:3.0133 train_time:80665ms step_avg:537.76ms train_loss_token_ce:3.0133 train_loss_nats_per_byte:1.2222 batch_target_bytes:161592 batch_bytes_per_token:2.4657
+step:200/20000 train_loss:2.7710 train_time:106880ms step_avg:534.40ms train_loss_token_ce:2.7710 train_loss_nats_per_byte:1.1174 batch_target_bytes:162532 batch_bytes_per_token:2.4800
+step:200/20000 val_loss:2.8304 val_bpb:1.6763 train_time:106880ms step_avg:534.40ms
+step:250/20000 train_loss:2.7287 train_time:132923ms step_avg:531.69ms train_loss_token_ce:2.7287 train_loss_nats_per_byte:1.1343 batch_target_bytes:157681 batch_bytes_per_token:2.4060
+step:300/20000 train_loss:2.6064 train_time:160140ms step_avg:533.80ms train_loss_token_ce:2.6064 train_loss_nats_per_byte:1.0824 batch_target_bytes:157777 batch_bytes_per_token:2.4075
+step:350/20000 train_loss:2.5998 train_time:187094ms step_avg:534.55ms train_loss_token_ce:2.5998 train_loss_nats_per_byte:1.0763 batch_target_bytes:158315 batch_bytes_per_token:2.4157
+step:400/20000 train_loss:2.3790 train_time:213912ms step_avg:534.78ms train_loss_token_ce:2.3790 train_loss_nats_per_byte:0.9465 batch_target_bytes:164721 batch_bytes_per_token:2.5134
+step:400/20000 val_loss:2.5419 val_bpb:1.5055 train_time:213913ms step_avg:534.78ms
+step:450/20000 train_loss:2.4902 train_time:240062ms step_avg:533.47ms train_loss_token_ce:2.4902 train_loss_nats_per_byte:1.0262 batch_target_bytes:159045 batch_bytes_per_token:2.4268
+step:500/20000 train_loss:2.4830 train_time:266263ms step_avg:532.53ms train_loss_token_ce:2.4830 train_loss_nats_per_byte:1.0004 batch_target_bytes:162719 batch_bytes_per_token:2.4829
+step:550/20000 train_loss:2.3620 train_time:293503ms step_avg:533.64ms train_loss_token_ce:2.3620 train_loss_nats_per_byte:0.9836 batch_target_bytes:157380 batch_bytes_per_token:2.4014
+step:600/20000 train_loss:2.4742 train_time:319584ms step_avg:532.64ms train_loss_token_ce:2.4742 train_loss_nats_per_byte:1.0236 batch_target_bytes:158475 batch_bytes_per_token:2.4181
+step:600/20000 val_loss:2.4234 val_bpb:1.4353 train_time:319584ms step_avg:532.64ms
+step:650/20000 train_loss:2.2860 train_time:346610ms step_avg:533.25ms train_loss_token_ce:2.2860 train_loss_nats_per_byte:0.9083 batch_target_bytes:164980 batch_bytes_per_token:2.5174
+step:700/20000 train_loss:2.4256 train_time:372730ms step_avg:532.47ms train_loss_token_ce:2.4256 train_loss_nats_per_byte:0.9907 batch_target_bytes:160533 batch_bytes_per_token:2.4495
+step:750/20000 train_loss:2.3242 train_time:399725ms step_avg:532.97ms train_loss_token_ce:2.3242 train_loss_nats_per_byte:0.9521 batch_target_bytes:160043 batch_bytes_per_token:2.4421
+step:800/20000 train_loss:2.3149 train_time:425931ms step_avg:532.41ms train_loss_token_ce:2.3149 train_loss_nats_per_byte:0.9458 batch_target_bytes:160421 batch_bytes_per_token:2.4478
+step:800/20000 val_loss:2.3483 val_bpb:1.3908 train_time:425932ms step_avg:532.41ms
+step:850/20000 train_loss:2.4179 train_time:453071ms step_avg:533.03ms train_loss_token_ce:2.4179 train_loss_nats_per_byte:1.0227 batch_target_bytes:155059 batch_bytes_per_token:2.3660
+step:900/20000 train_loss:2.3380 train_time:479310ms step_avg:532.57ms train_loss_token_ce:2.3380 train_loss_nats_per_byte:0.9692 batch_target_bytes:158144 batch_bytes_per_token:2.4131
+step:950/20000 train_loss:2.3466 train_time:505992ms step_avg:532.62ms train_loss_token_ce:2.3466 train_loss_nats_per_byte:0.9582 batch_target_bytes:160555 batch_bytes_per_token:2.4499
+step:1000/20000 train_loss:2.3292 train_time:531593ms step_avg:531.59ms train_loss_token_ce:2.3292 train_loss_nats_per_byte:0.9395 batch_target_bytes:162633 batch_bytes_per_token:2.4816
+step:1000/20000 val_loss:2.2961 val_bpb:1.3599 train_time:531594ms step_avg:531.59ms
+step:1050/20000 train_loss:2.3538 train_time:557843ms step_avg:531.28ms train_loss_token_ce:2.3538 train_loss_nats_per_byte:0.9610 batch_target_bytes:160526 batch_bytes_per_token:2.4494
+step:1100/20000 train_loss:2.2458 train_time:583340ms step_avg:530.31ms train_loss_token_ce:2.2458 train_loss_nats_per_byte:0.9091 batch_target_bytes:161888 batch_bytes_per_token:2.4702
+step:1131/20000 val_loss:2.2763 val_bpb:1.3482 train_time:600014ms step_avg:530.52ms
+stopping_early: wallclock_cap train_time:600014ms step:1131/20000
+peak memory allocated: 10239 MiB reserved: 10748 MiB
+Serialized model: 67225047 bytes
+Code size: 61795 bytes
+Total submission size: 67286842 bytes
+Serialized model int8+zlib: 12781623 bytes (payload:17178912 raw_torch:17224025 payload_ratio:3.91x)
+Total submission size int8+zlib: 12843418 bytes
+final_int8_zlib_roundtrip val_loss:2.2787 val_bpb:1.3496 eval_time:11118ms
+final_int8_zlib_roundtrip_exact val_loss:2.27868765 val_bpb:1.34956718
+log: smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control
+final metrics: val_loss=2.27868765 val_bpb=1.34956718 source=final_int8_zlib_roundtrip_exact
+artifact bytes: model_raw=67225047 model_int8_zlib=12781623 code=61795 total_raw=67286842 total_int8_zlib=12843418
+wallclock: stop_reason=wallclock_cap stop_train_time_ms=600014 stop_step=1131 iterations=20000 step_avg_ms=530.52 final_eval_time_ms=11118
+peak memory: allocated_mib=10239 reserved_mib=10748
+summary_path=/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_224611_smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control/summary.txt
+json_path=/workspace/parameter-golf/logs/experiments/baseline_1gpu/20260321_224611_smeargate_bigramhash_mlp3x_warmprobe_20260321_run1_control/summary.json

@@ -1,0 +1,160 @@
+{
+  "artifact_cap_bytes": 16000000,
+  "artifact_cap_ok": true,
+  "branch": "main",
+  "code_bytes": 61795,
+  "code_path": "train_gpt.py",
+  "commit_sha": "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+  "compare_target": {
+    "anchor_status": "provisional_legacy",
+    "baseline_label": "runpod_1xh100_control_anchor",
+    "compatibility_note": "Canonical compare file for the provisional legacy Runpod 1xH100 control anchor. The legacy local_1xh100 filename remains as the older historical baseline summary.",
+    "final_val_bpb": 1.32157507,
+    "final_val_loss": 2.23142415,
+    "label": "runpod_1xh100_control_anchor",
+    "log_path": "metrics mirrored from experiments/ledger.csv run_id=ablate_control_1xh100_1024",
+    "path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\experiments\\baselines\\runpod_1xh100_control_anchor_summary.json",
+    "provenance_status": "mirrored_from_ledger_only",
+    "raw_log_present": false,
+    "raw_result_packet_present": false,
+    "requires_rebuild_before_ablation": true,
+    "source_commit_sha": null,
+    "source_commit_sha_inferred": "ac7e33ddcb84253c3ed713668785c3b598c8259b",
+    "source_run_id": "ablate_control_1xh100_1024",
+    "total_submission_size_int8_zlib_bytes": 14004564
+  },
+  "comparison": {
+    "delta_bytes_total": -660400,
+    "delta_eval_time_ms": null,
+    "delta_stop_step": -248,
+    "delta_val_bpb": 0.018067929999999954,
+    "delta_val_loss": 0.030506939999999982,
+    "label": "runpod_1xh100_control_anchor"
+  },
+  "confirmed_findings": [
+    "First run on the fresh same-pod pair landed at val_bpb=1.33964300 with stop_step=1258 and total_submission_size_int8_zlib_bytes=13344164.",
+    "Recorded host_fingerprint_sha256 matched the second run at c8d9064377e5b6e6e15e7fb44a2946b754c2e26ad0c2e5aec5f9e5dcbb42592e."
+  ],
+  "core_hparams": "seq1024 9x512 kv4 mlp_mult2 tied_emb baseline_schedule warm_state_pair_run1",
+  "counted_model_bytes": 13282369,
+  "counted_model_bytes_source": "model_int8_zlib_bytes",
+  "counted_total_bytes": 13344164,
+  "counted_total_bytes_source": "total_submission_size_int8_zlib_bytes",
+  "dataset_variant": "fineweb10B_sp1024",
+  "date": "2026-03-21",
+  "exact_command": "env RUN_ID=control_path_warm_state_pair_20260321_run1 DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py",
+  "experiment_id": "control_path_warm_state_pair_20260321",
+  "final_eval_time_ms": 11137,
+  "final_metric_source": "final_int8_zlib_roundtrip_exact",
+  "final_val_bpb": 1.339643,
+  "final_val_loss": 2.26193109,
+  "hardware": "1xH100 Runpod NVIDIA H100 80GB HBM3",
+  "idea_label": "Control 1xH100",
+  "inferred_conclusions": [
+    "The first run still sat well above the fresh-pod ~1.3528 regime improvement target versus the provisional legacy control anchor, so it does not by itself explain the rebuilt same-pod 1.3278-1.3347 family."
+  ],
+  "iterations": 20000,
+  "last_logged_step_avg_ms": 477.2,
+  "last_logged_train_time_ms": 600322,
+  "last_step": 1258,
+  "lineage": "variant",
+  "log_path": "C:\\Users\\g3n_i\\Desktop\\0. Coding\\Projects\\parameter-golf\\artifacts\\runpod\\control_path_warm_state_pair_20260321\\20260321_212045_control_path_warm_state_pair_20260321_run1\\run.log",
+  "model_bytes": 67225047,
+  "model_int8_zlib_bytes": 13282369,
+  "notes": "Fresh official-template 1xH100 warm-state pair run 1 of 2. Local run.log reconstructed verbatim from captured SSH stdout after the zero-volume pod lost its remote log directory on post-run restart.",
+  "peak_memory_allocated_mib": 10239,
+  "peak_memory_reserved_mib": 10748,
+  "provenance": {
+    "code": {
+      "bytes": 61795,
+      "path": "/workspace/parameter-golf/train_gpt.py",
+      "sha256": "15846ddcd260753dbd7023522e1e12a6d0dec0dd5cb5e5a69446b6407a3b7bd5"
+    },
+    "compare_json": {
+      "anchor_status": "provisional_legacy",
+      "label": "runpod_1xh100_control_anchor",
+      "path": "C:/Users/g3n_i/Desktop/0. Coding/Projects/parameter-golf/experiments/baselines/runpod_1xh100_control_anchor_summary.json",
+      "sha256": "aa400747841436b3190d0cd239957f7ad8fd14a93232639f7f9a55a786959d99"
+    },
+    "core_hparams": "seq1024 9x512 kv4 mlp_mult2 tied_emb baseline_schedule",
+    "created_at_utc": "2026-03-21T21:20:45Z",
+    "dataset": {
+      "expected_train_shards": 80,
+      "manifest_sha256": "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+      "path": "/workspace/parameter-golf/data/datasets/fineweb10B_sp1024",
+      "train_shards_found": 80,
+      "val_shards_found": 1
+    },
+    "dataset_variant": "fineweb10B_sp1024",
+    "exact_command": "env RUN_ID=control_path_warm_state_pair_20260321_run1 DATA_PATH=/workspace/parameter-golf/data/datasets/fineweb10B_sp1024 TOKENIZER_PATH=/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model VOCAB_SIZE=1024 TRAIN_LOG_EVERY=50 VAL_LOSS_EVERY=200 MAX_WALLCLOCK_SECONDS=600 torchrun --standalone --nproc_per_node=1 train_gpt.py",
+    "git": {
+      "branch": "main",
+      "commit_sha": "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+      "dirty": true,
+      "status_short": [
+        " M scripts/experiments/write_run_provenance.py",
+        "?? scripts/experiments/run_warm_state_control_pair.sh",
+        "?? scripts/experiments/summarize_warm_state_pair.py"
+      ]
+    },
+    "hardware": "Runpod 1xH100 pod",
+    "host": {
+      "fingerprint_sha256": "c8d9064377e5b6e6e15e7fb44a2946b754c2e26ad0c2e5aec5f9e5dcbb42592e",
+      "gpu_count": 1,
+      "gpu_names": [
+        "NVIDIA H100 80GB HBM3"
+      ],
+      "gpu_query_rows": [
+        "NVIDIA H100 80GB HBM3, 570.172.08, 81559 MiB, 00000000:04:00.0"
+      ],
+      "hostname": "7b66b1cf9f6d",
+      "python": {
+        "python_version": "3.12.3",
+        "sentencepiece_version": "0.2.0",
+        "torch_cuda_version": "12.8",
+        "torch_version": "2.9.1+cu128"
+      },
+      "vcpu_count": 208
+    },
+    "log_file": "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_212045_control_path_warm_state_pair_20260321_run1/run.log",
+    "repo_dir": "/workspace/parameter-golf",
+    "run_dir": "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_212045_control_path_warm_state_pair_20260321_run1",
+    "run_id": "control_path_warm_state_pair_20260321_run1",
+    "schema_version": 1,
+    "target_gpu_label": "h100",
+    "tokenizer": {
+      "path": "/workspace/parameter-golf/data/tokenizers/fineweb_1024_bpe.model",
+      "sha256": "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a"
+    },
+    "tokenizer_variant": "fineweb_1024_bpe.model",
+    "track_intent": "non-record",
+    "wallclock_target": "600s",
+    "wrappers": [
+      {
+        "bytes": 6820,
+        "path": "/workspace/parameter-golf/scripts/experiments/run_warm_state_control_pair.sh",
+        "sha256": "ea12740f71aa0b0b7d61e1e9a7e0c6c028550548afdd09aecea6fa6a2b026e6b"
+      },
+      {
+        "bytes": 8754,
+        "path": "/workspace/parameter-golf/scripts/experiments/run_baseline_1gpu.sh",
+        "sha256": "79cc15090631a568c6c80c376520d7de51d864de992638c68066fa5ea5f3c5f8"
+      }
+    ]
+  },
+  "result": "inconclusive",
+  "run_id": "control_path_warm_state_pair_20260321_run1",
+  "schema_version": 1,
+  "scope": "1xH100-surrogate",
+  "standardized_name": "runpod_1xh100_control_anchor",
+  "state": "already-tried",
+  "status": "completed",
+  "stop_reason": "wallclock_cap",
+  "stop_step": 1258,
+  "stop_train_time_ms": 600322,
+  "tokenizer_variant": "fineweb_1024_bpe.model",
+  "total_submission_size_bytes": 67286842,
+  "total_submission_size_int8_zlib_bytes": 13344164,
+  "track_intent": "non-record",
+  "wallclock_target": "600s"
+}

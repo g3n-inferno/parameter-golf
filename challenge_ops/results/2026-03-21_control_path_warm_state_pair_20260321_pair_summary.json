@@ -1,0 +1,77 @@
+{
+  "comparison": {
+    "delta_final_eval_time_ms": 19,
+    "delta_step_avg_ms": -9.370000000000005,
+    "delta_stop_step": 25,
+    "delta_stop_train_time_ms": -100,
+    "delta_total_submission_size_int8_zlib_bytes": -41655,
+    "delta_val_bpb": -0.0021043299999998766,
+    "delta_val_loss": -0.0035530800000000973,
+    "same_code_sha256": true,
+    "same_dataset_manifest_sha256": true,
+    "same_git_commit_sha": true,
+    "same_host_fingerprint_sha256": true,
+    "same_tokenizer_sha256": true,
+    "same_wrapper_sha256": true
+  },
+  "pair_label": "control_path_warm_state_pair_20260321",
+  "run_1": {
+    "code_sha256": "15846ddcd260753dbd7023522e1e12a6d0dec0dd5cb5e5a69446b6407a3b7bd5",
+    "dataset_manifest_sha256": "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+    "final_eval_time_ms": 11137,
+    "final_val_bpb": 1.339643,
+    "final_val_loss": 2.26193109,
+    "git_commit_sha": "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+    "git_dirty": true,
+    "gpu_names": [
+      "NVIDIA H100 80GB HBM3"
+    ],
+    "gpu_query_rows": [
+      "NVIDIA H100 80GB HBM3, 570.172.08, 81559 MiB, 00000000:04:00.0"
+    ],
+    "host_fingerprint_sha256": "c8d9064377e5b6e6e15e7fb44a2946b754c2e26ad0c2e5aec5f9e5dcbb42592e",
+    "hostname": "7b66b1cf9f6d",
+    "python_version": "3.12.3",
+    "run_dir": "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_212045_control_path_warm_state_pair_20260321_run1",
+    "run_id": "control_path_warm_state_pair_20260321_run1",
+    "step_avg_ms": 477.2,
+    "stop_step": 1258,
+    "stop_train_time_ms": 600322,
+    "tokenizer_sha256": "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a",
+    "torch_cuda_version": "12.8",
+    "torch_version": "2.9.1+cu128",
+    "total_submission_size_int8_zlib_bytes": 13344164,
+    "vcpu_count": 208,
+    "wrapper_sha256": "ea12740f71aa0b0b7d61e1e9a7e0c6c028550548afdd09aecea6fa6a2b026e6b"
+  },
+  "run_2": {
+    "code_sha256": "15846ddcd260753dbd7023522e1e12a6d0dec0dd5cb5e5a69446b6407a3b7bd5",
+    "dataset_manifest_sha256": "c0ebc88d5ac10324c8dc29c9c27041ec0efdc6441f9be747901c4f7f45f59ae9",
+    "final_eval_time_ms": 11156,
+    "final_val_bpb": 1.33753867,
+    "final_val_loss": 2.25837801,
+    "git_commit_sha": "d1200c7c450a3da03dff0cdcf392b6340e645aaf",
+    "git_dirty": true,
+    "gpu_names": [
+      "NVIDIA H100 80GB HBM3"
+    ],
+    "gpu_query_rows": [
+      "NVIDIA H100 80GB HBM3, 570.172.08, 81559 MiB, 00000000:04:00.0"
+    ],
+    "host_fingerprint_sha256": "c8d9064377e5b6e6e15e7fb44a2946b754c2e26ad0c2e5aec5f9e5dcbb42592e",
+    "hostname": "7b66b1cf9f6d",
+    "python_version": "3.12.3",
+    "run_dir": "/workspace/parameter-golf/logs/experiments/warm_state_control_pair/control_path_warm_state_pair_20260321/20260321_213405_control_path_warm_state_pair_20260321_run2",
+    "run_id": "control_path_warm_state_pair_20260321_run2",
+    "step_avg_ms": 467.83,
+    "stop_step": 1283,
+    "stop_train_time_ms": 600222,
+    "tokenizer_sha256": "4f5e8adb109c66b4886963bc75a7befd73bda36d27fd7102df8e9e66503b0e2a",
+    "torch_cuda_version": "12.8",
+    "torch_version": "2.9.1+cu128",
+    "total_submission_size_int8_zlib_bytes": 13302509,
+    "vcpu_count": 208,
+    "wrapper_sha256": "ea12740f71aa0b0b7d61e1e9a7e0c6c028550548afdd09aecea6fa6a2b026e6b"
+  },
+  "schema_version": 1
+}

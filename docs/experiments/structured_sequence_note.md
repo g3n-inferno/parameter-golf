@@ -10,6 +10,13 @@ The most realistic original directions after the low-risk ablations are:
 
 These ideas stay close to token-sequence structure and can improve quality-per-byte through reuse instead of brute-force width.
 
+## Current Narrow Prototype
+
+- The current trainer prototype, if enabled, keeps the shared trunk and adds exactly two small residual MLP experts.
+- Expert application is sequence-level only: either learned fixed mixture scalars or a tiny pooled-hidden-state router, never token-level sparse dispatch.
+- Experts are restricted to the upper shared-depth passes so the baseline path and export/roundtrip flow stay intact.
+- TODO boundary: if this needs more than a tiny fixed-vs-router comparison, move the next iteration into a `records/` experiment script instead of growing `train_gpt.py` into a generic MoE system.
+
 ## Best Medium-Term Branch
 
 The best original branch after the current ablation matrix is:

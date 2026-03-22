@@ -35,6 +35,8 @@ Supported experiment_id values:
   quality_top_half
   shared_depth
   shared_depth_stable
+  shared_depth_experts_fixed
+  shared_depth_experts_router
 
 This wrapper preserves the documented 1xH100 baseline path and only layers named
 env-var ablations on top. It also refreshes experiments/ledger.csv from the
@@ -177,6 +179,24 @@ case "$EXPERIMENT_ID" in
       "SHARED_DEPTH_UNIQUE_BLOCKS=3"
       "SHARED_DEPTH_TOTAL_PASSES=9"
       "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+    )
+    ;;
+  shared_depth_experts_fixed)
+    RUN_ID="${RUN_ID:-ablate_shared_depth_experts_fixed_1xh100}"
+    CORE_HPARAMS="seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse experts=2 upper3 mlp_hidden64 fixed_mix"
+    NOTES="shared-depth plus two small sequence-level residual experts on the later passes with learned fixed mixture scalars"
+    experiment_env=(
+      "SHARED_DEPTH_MODE=cyclic" "SHARED_DEPTH_UNIQUE_BLOCKS=3" "SHARED_DEPTH_TOTAL_PASSES=9" "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+      "SHARED_DEPTH_EXPERT_MODE=fixed" "SHARED_DEPTH_EXPERT_HIDDEN=64" "SHARED_DEPTH_EXPERT_UPPER_PASSES=3"
+    )
+    ;;
+  shared_depth_experts_router)
+    RUN_ID="${RUN_ID:-ablate_shared_depth_experts_router_1xh100}"
+    CORE_HPARAMS="seq1024 shared_depth cyclic unique3 passes9 resid_scale=inv_sqrt_reuse experts=2 upper3 mlp_hidden64 seq_router"
+    NOTES="shared-depth plus two small sequence-level residual experts on the later passes with a pooled-state router"
+    experiment_env=(
+      "SHARED_DEPTH_MODE=cyclic" "SHARED_DEPTH_UNIQUE_BLOCKS=3" "SHARED_DEPTH_TOTAL_PASSES=9" "SHARED_DEPTH_RESIDUAL_SCALE_MODE=inv_sqrt_reuse"
+      "SHARED_DEPTH_EXPERT_MODE=router" "SHARED_DEPTH_EXPERT_HIDDEN=64" "SHARED_DEPTH_EXPERT_UPPER_PASSES=3"
     )
     ;;
   *)

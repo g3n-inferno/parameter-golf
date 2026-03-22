@@ -100,6 +100,9 @@ class Hyperparameters:
     shared_depth_unique_blocks = int(os.environ.get("SHARED_DEPTH_UNIQUE_BLOCKS", 0))
     shared_depth_total_passes = int(os.environ.get("SHARED_DEPTH_TOTAL_PASSES", 0))
     shared_depth_residual_scale_mode = os.environ.get("SHARED_DEPTH_RESIDUAL_SCALE_MODE", "off")
+    shared_depth_expert_mode = os.environ.get("SHARED_DEPTH_EXPERT_MODE", "off")
+    shared_depth_expert_hidden = int(os.environ.get("SHARED_DEPTH_EXPERT_HIDDEN", 64))
+    shared_depth_expert_upper_passes = int(os.environ.get("SHARED_DEPTH_EXPERT_UPPER_PASSES", 3))
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -283,7 +286,7 @@ def eval_val(
             x = local[:-1].reshape(-1, args.train_seq_len)
             y = local[1:].reshape(-1, args.train_seq_len)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                batch_loss, _, _, _ = model(
+                batch_loss, _, _, _, _ = model(
                     x,
                     y,
                     base_bytes_lut,
@@ -328,7 +331,7 @@ CONTROL_TENSOR_NAME_PATTERNS = tuple(
     pattern
     for pattern in os.environ.get(
         "CONTROL_TENSOR_NAME_PATTERNS",
-        "attn_scale,attn_scales,mlp_scale,mlp_scales,resid_mix,resid_mixes,q_gain,skip_weight,skip_weights",
+        "attn_scale,attn_scales,mlp_scale,mlp_scales,resid_mix,resid_mixes,q_gain,skip_weight,skip_weights,expert_router,expert_logits",
     ).split(",")
     if pattern
 )
@@ -823,6 +826,9 @@ class GPT(nn.Module):
         shared_depth_unique_blocks: int = 0,
         shared_depth_total_passes: int = 0,
         shared_depth_residual_scale_mode: str = "off",
+        shared_depth_expert_mode: str = "off",
+        shared_depth_expert_hidden: int = 64,
+        shared_depth_expert_upper_passes: int = 3,
     ):
         super().__init__()
         if logit_softcap <= 0.0:
@@ -833,6 +839,12 @@ class GPT(nn.Module):
             raise ValueError(
                 f"Unsupported SHARED_DEPTH_RESIDUAL_SCALE_MODE={shared_depth_residual_scale_mode}"
             )
+        if shared_depth_expert_mode not in {"off", "fixed", "router"}:
+            raise ValueError(f"Unsupported SHARED_DEPTH_EXPERT_MODE={shared_depth_expert_mode}")
+        if shared_depth_expert_mode != "off" and (
+            shared_depth_mode == "off" or shared_depth_expert_hidden <= 0 or shared_depth_expert_upper_passes <= 0
+        ):
+            raise ValueError("Shared-depth residual experts require shared depth plus positive hidden/upper-pass settings")
         self.tie_embeddings = tie_embeddings
         self.tied_embed_init_std = tied_embed_init_std
         self.logit_softcap = logit_softcap
@@ -900,6 +912,13 @@ class GPT(nn.Module):
             if self.shared_depth_residual_scale_mode == "inv_sqrt_reuse"
             else 1.0
         )
+        self.shared_depth_expert_mode = shared_depth_expert_mode
+        self.shared_depth_expert_hidden = shared_depth_expert_hidden if shared_depth_expert_mode != "off" else 0
+        self.shared_depth_expert_upper_passes = min(shared_depth_expert_upper_passes, self.execution_passes) if shared_depth_expert_mode != "off" else 0
+        self.shared_depth_expert_start = max(self.execution_passes - self.shared_depth_expert_upper_passes, 0)
+        self.shared_depth_experts = nn.ModuleList([MLP(model_dim, 1, mlp_hidden=shared_depth_expert_hidden) for _ in range(2)]) if shared_depth_expert_mode != "off" else nn.ModuleList()
+        self.shared_depth_expert_logits = nn.Parameter(torch.zeros(2, dtype=torch.float32)) if shared_depth_expert_mode == "fixed" else None
+        self.shared_depth_expert_router = CastedLinear(model_dim, 2, bias=False) if shared_depth_expert_mode == "router" else None
         self.final_norm = RMSNorm()
         self.lm_head = None if tie_embeddings else CastedLinear(model_dim, vocab_size, bias=False)
         if self.lm_head is not None:
@@ -918,6 +937,15 @@ class GPT(nn.Module):
             return self.blocks[pass_idx]
         return self.shared_blocks[pass_idx % self.shared_depth_unique_blocks]
 
+    def _apply_shared_depth_experts(self, x: Tensor, pass_idx: int) -> tuple[Tensor, Tensor]:
+        if self.shared_depth_expert_mode == "off" or pass_idx < self.shared_depth_expert_start:
+            return x, torch.zeros(3, device=x.device, dtype=torch.float32)
+        weights = self.shared_depth_expert_logits.softmax(0)[None, :].expand(x.size(0), -1) if self.shared_depth_expert_mode == "fixed" else F.softmax(self.shared_depth_expert_router(F.rms_norm(x.mean(dim=1), (x.size(-1),))).float(), dim=-1)
+        expert_in = F.rms_norm(x, (x.size(-1),))
+        delta = weights[:, 0].to(dtype=x.dtype)[:, None, None] * self.shared_depth_experts[0](expert_in)
+        delta = delta + weights[:, 1].to(dtype=x.dtype)[:, None, None] * self.shared_depth_experts[1](expert_in)
+        return x + delta, torch.cat((weights.float().mean(dim=0), delta.float().square().mean().sqrt()[None]))
+
     def forward(
         self,
         input_ids: Tensor,
@@ -925,21 +953,24 @@ class GPT(nn.Module):
         base_bytes_lut: Tensor,
         has_leading_space_lut: Tensor,
         is_boundary_token_lut: Tensor,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
         x = self.tok_emb(input_ids)
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         skips: list[Tensor] = []
         residual_scale = self.shared_depth_residual_scale
+        expert_mix = torch.zeros(3, device=x.device, dtype=torch.float32)
 
         # First half stores skips; second half reuses them in reverse order.
         for i in range(self.num_encoder_layers):
             x = self._active_block(i)(x, x0, residual_scale=residual_scale)
+            x, expert_mix = self._apply_shared_depth_experts(x, i)
             skips.append(x)
         for i in range(self.num_decoder_layers):
             if skips:
                 x = x + self.skip_weights[i].to(dtype=x.dtype)[None, None, :] * skips.pop()
             x = self._active_block(self.num_encoder_layers + i)(x, x0, residual_scale=residual_scale)
+            x, expert_mix = self._apply_shared_depth_experts(x, self.num_encoder_layers + i)
 
         x = self.final_norm(x).reshape(-1, x.size(-1))
         targets = target_ids.reshape(-1)
@@ -963,12 +994,12 @@ class GPT(nn.Module):
         batch_target_bytes = token_bytes.to(dtype=token_losses.dtype).sum().clamp_min(1.0)
         nats_per_byte = token_losses.sum() / batch_target_bytes
         bytes_per_token = batch_target_bytes / max(targets.numel(), 1)
-        return token_ce, nats_per_byte, batch_target_bytes, bytes_per_token
+        return token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix
 
 
 def collect_block_optimizer_params(model: GPT) -> tuple[list[Tensor], list[Tensor]]:
     block_container = model.shared_blocks if model.shared_depth_mode != "off" else model.blocks
-    block_named_params = list(block_container.named_parameters())
+    block_named_params = list(block_container.named_parameters()) + [(name, p) for name, p in model.named_parameters() if name.startswith("shared_depth_expert")]
     matrix_params = [
         p
         for name, p in block_named_params
@@ -1128,6 +1159,9 @@ def main() -> None:
         shared_depth_unique_blocks=args.shared_depth_unique_blocks,
         shared_depth_total_passes=args.shared_depth_total_passes,
         shared_depth_residual_scale_mode=args.shared_depth_residual_scale_mode,
+        shared_depth_expert_mode=args.shared_depth_expert_mode,
+        shared_depth_expert_hidden=args.shared_depth_expert_hidden,
+        shared_depth_expert_upper_passes=args.shared_depth_expert_upper_passes,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -1186,6 +1220,9 @@ def main() -> None:
         f"residual_scale_mode:{base_model.shared_depth_residual_scale_mode} "
         f"residual_scale:{base_model.shared_depth_residual_scale:.6f}"
     )
+    expert_delta_params = sum(p.numel() for name, p in base_model.named_parameters() if name.startswith("shared_depth_experts"))
+    expert_gate_params = sum(p.numel() for name, p in base_model.named_parameters() if name.startswith("shared_depth_expert_") and not name.startswith("shared_depth_experts"))
+    log0(f"shared_depth_experts:mode:{base_model.shared_depth_expert_mode} upper_passes:{base_model.shared_depth_expert_upper_passes} hidden:{base_model.shared_depth_expert_hidden} delta_params:{expert_delta_params} gate_params:{expert_gate_params}")
     log0(
         f"tie_embeddings:{args.tie_embeddings} embed_lr:{token_lr} "
         f"head_lr:{args.head_lr if base_model.lm_head is not None else 0.0} "
@@ -1237,7 +1274,7 @@ def main() -> None:
                     model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
                 x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                    warmup_token_ce, warmup_nats_per_byte, _, _ = model(
+                    warmup_token_ce, warmup_nats_per_byte, _, _, _ = model(
                         x,
                         y,
                         base_bytes_lut,
@@ -1316,7 +1353,7 @@ def main() -> None:
                 model.require_backward_grad_sync = micro_step == grad_accum_steps - 1
             x, y = train_loader.next_batch(args.train_batch_tokens, args.train_seq_len, grad_accum_steps)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=True):
-                token_ce, nats_per_byte, batch_target_bytes, bytes_per_token = model(
+                token_ce, nats_per_byte, batch_target_bytes, bytes_per_token, expert_mix = model(
                     x,
                     y,
                     base_bytes_lut,
@@ -1358,13 +1395,14 @@ def main() -> None:
             and (step <= 10 or step % args.train_log_every == 0 or stop_after_step is not None)
         )
         if should_log_train:
+            expert_mix_str = "" if base_model.shared_depth_expert_mode == "off" else f" expert_mix:[{expert_mix[0].item():.3f},{expert_mix[1].item():.3f}] expert_delta_rms:{expert_mix[2].item():.6f}"
             log0(
                 f"step:{step}/{args.iterations} train_loss:{train_loss.item():.4f} "
                 f"train_time:{approx_training_time_ms:.0f}ms step_avg:{approx_training_time_ms / step:.2f}ms "
                 f"train_loss_token_ce:{train_loss_token_ce.item():.4f} "
                 f"train_loss_nats_per_byte:{train_loss_nats_per_byte.item():.4f} "
                 f"batch_target_bytes:{train_batch_target_bytes.item():.0f} "
-                f"batch_bytes_per_token:{train_batch_bytes_per_token.item():.4f}"
+                f"batch_bytes_per_token:{train_batch_bytes_per_token.item():.4f}{expert_mix_str}"
             )
 
         # Needed to sync whether we've reached the wallclock cap.
