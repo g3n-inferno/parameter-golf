@@ -944,7 +944,7 @@ class GPT(nn.Module):
         expert_in = F.rms_norm(x, (x.size(-1),))
         delta = weights[:, 0].to(dtype=x.dtype)[:, None, None] * self.shared_depth_experts[0](expert_in)
         delta = delta + weights[:, 1].to(dtype=x.dtype)[:, None, None] * self.shared_depth_experts[1](expert_in)
-        return x + delta, torch.cat((weights.float().mean(dim=0), delta.float().square().mean().sqrt()[None]))
+        return x + 0.1 * delta, torch.cat((weights.float().mean(dim=0), delta.float().square().mean().sqrt()[None]))
 
     def forward(
         self,
